@@ -32,7 +32,7 @@ namespace CrawlDataService.Service
                 var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
                 var hrefLink = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-right").Any()).Select(e => e.Descendants("a").FirstOrDefault().Attributes["href"].Value).FirstOrDefault();
                 logger.Info($"End crawl path novel page:{pageNumber}");
-                GetNovelPath(pageNovel++, hrefLink?.Replace(";", "&"));
+                //GetNovelPath(pageNovel++, hrefLink?.Replace(";", "&"));
 
             }
             catch (Exception ex)
@@ -119,7 +119,7 @@ namespace CrawlDataService.Service
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {pathNovel}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, pathNovel, 0, null));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, pathNovel, 0, null, null));
             }
         }
         
@@ -127,7 +127,7 @@ namespace CrawlDataService.Service
         {
             if (string.IsNullOrEmpty(pathChapter)) return;
             pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
-            if (chaper % 50 == 0) Thread.Sleep(30000);
+            //if (chaper % 50 == 0) Thread.Sleep(25000);
             try
             {
                 logger.Info($"Start crawl novel:{nameNovel}, chapter: {chaper}");
@@ -143,13 +143,13 @@ namespace CrawlDataService.Service
                 var indexBox = htmlDoc.GetHtmlNode("span", "class", "index-box");
                 var tagA = indexBox?.GetHtmlNode("a", "id", "btnNextChapter");
                 var nextChapterPath = $"{pathWeb}{tagA?.Attributes["href"].Value}";
-                Thread.Sleep(10000);
+                Thread.Sleep(3000 * RuntimeContext.MaxThraed);
                 await GetContentChapter(nameNovel, chaper += 1, pathSave, nextChapterPath);
             }
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {nameNovel}, chapter: {chaper}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, null, chaper, pathChapter));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, null, chaper, pathChapter, pathSave));
             }
         }
 

@@ -85,9 +85,9 @@ namespace Common
             return path;
         }
 
-        public static string FormatErrorChapter(bool isNovelError, string? pathNovel, int chapterNumber, string? pathChapter)
+        public static string FormatErrorChapter(bool isNovelError, string? pathNovel, int chapterNumber, string? pathChapter, string? pathChapterLocal)
         {
-            return $"IsNovelError: {isNovelError}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter}";
+            return $"IsNovelError: {isNovelError}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
         }
 
     }
