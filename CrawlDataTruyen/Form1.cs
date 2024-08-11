@@ -22,6 +22,7 @@ namespace CrawlDataTruyen
             {
                 RuntimeContext.MaxThraed = threadNUmber;
             }
+            RuntimeContext.PathSaveLocal = txtFolderPath.Text;
 
             var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<GetDataFromWebService>();
             Task.Run(async () =>
@@ -51,6 +52,26 @@ namespace CrawlDataTruyen
             {
                 txtFolderPath.Text = folderBrowserDialog1.SelectedPath;
             }
+        }
+
+        private void btnReCrawl_Click(object sender, EventArgs e)
+        {
+            var infoLog = ReadFile.ReadFileLog(RuntimeContext.PathChapterError);
+            var errorNovel = infoLog.Where(e => e.IsNovelError == true).ToList();
+            var errorChaper = infoLog.Where(e => e.IsNovelError == false).ToList();
+
+            if (string.IsNullOrEmpty(txtLinkCrawl.Text)) return;
+            if (string.IsNullOrEmpty(txtFolderPath.Text)) return;
+            if (int.TryParse(txtThreadNumber.Text, out var threadNUmber))
+            {
+                RuntimeContext.MaxThraed = threadNUmber;
+            }
+
+            var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<GetDataFromWebService>();
+            Task.Run(async () =>
+            {
+                await getDataFromWebService.StartReCrawData(1, errorNovel, errorChaper, txtFolderPath.Text);
+            });
         }
     }
 }

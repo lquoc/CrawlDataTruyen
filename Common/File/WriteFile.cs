@@ -5,9 +5,15 @@ using System.Collections;
 
 namespace Common
 {
-    public class WriteFileTxt
+    public class WriteFile
     {
         private static MyLogger logger = MyLogger.GetInstance();
+        public static void WriteFileTxt(string nameNovel)
+        {
+            var pathCombine = Path.Combine(RuntimeContext.PathSaveLocal, RuntimeContext.NameFileNovelList);
+            File.AppendAllText(pathCombine, nameNovel + Environment.NewLine);
+            logger.Info($"Add a novel into NovelList {nameNovel}");
+        }
 
         public static void WriteFileXLSX(string path, string nameFile, Dictionary<string, Novel> dicResult)
         {
@@ -58,7 +64,7 @@ namespace Common
         }
 
 
-        public static void WriteFile(string path, string nameFile, string? content)
+        public static void WriteFileTxt(string path, string nameFile, string? content)
         {
             try
             {

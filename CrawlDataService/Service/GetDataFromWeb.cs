@@ -1,8 +1,8 @@
 ﻿using Common;
 using CrawlDataService.Common;
 using HtmlAgilityPack;
+using OpenQA.Selenium;
 using Repository.Model;
-using System.Net;
 using System.Text;
 
 namespace CrawlDataService.Service
@@ -18,8 +18,8 @@ namespace CrawlDataService.Service
             try
             {
                 pathSearch = PropertyExtension.CheckPathWeb(pathSearch);
-                var webClient = new WebClient();
-                var html = webClient.CreateWebClient().DownloadString(pathSearch);
+                IWebDriver webDrive = NewWebClient.GetInstantWebDriver();
+                var html = webDrive.GetWebBySelenium(pathSearch);
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
                 var bookListNode = htmlDoc.GetListHtmlNode("div", "class", "book-list");
@@ -33,7 +33,7 @@ namespace CrawlDataService.Service
                 var hrefLink = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-right").Any()).Select(e => e.Descendants("a").FirstOrDefault().Attributes["href"].Value).FirstOrDefault();
                 logger.Info($"End crawl path novel page:{pageNumber}");
                 //GetNovelPath(pageNovel++, hrefLink?.Replace(";", "&"));
-
+                webDrive.Quit();
             }
             catch (Exception ex)
             {
@@ -46,6 +46,9 @@ namespace CrawlDataService.Service
             try
             {
                 GetNovelPath(1, pathSearch);
+                HashSet<string> novelCrawled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                novelCrawled = ReadFile.ReadFileTxt();
+                listPathNovel = listPathNovel.Where(x => !novelCrawled.Contains(x)).ToList();
                 var currentTaskCount = listPathNovel.Count / numberBatch + (listPathNovel.Count % numberBatch > 0 ? 1 : 0);
                 var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (listPathNovel.Count / RuntimeContext.MaxThraed + (listPathNovel.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
                 var tasks = new List<Task>();
@@ -61,25 +64,81 @@ namespace CrawlDataService.Service
                     tasks.Add(task);
                 }
                 Task.WaitAll(tasks.ToArray());
-                WriteFileTxt.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}", dicNovel);
+                WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}", dicNovel);
             }
             catch (Exception ex)
             {
-                logger.Error($"while in multithread, msg: {ex}");
+                logger.Error($"Error while in multithread, msg: {ex}");
             }
         }
-        
+
+
+        public async Task StartReCrawData(int numberBatch, List<ChapterErrorLog> novelError, List<ChapterErrorLog> chapterError, string pathSave)
+        {
+
+            logger.Info("Start ReCrawl Novel Error");
+            try
+            {
+                var currentTaskCount = novelError.Count / numberBatch + (novelError.Count % numberBatch > 0 ? 1 : 0);
+                var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (novelError.Count / RuntimeContext.MaxThraed + (novelError.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
+                var tasks = new List<Task>();
+                foreach (var batch in novelError.Chunk(batchNumber))
+                {
+                    var task = Task.Factory.StartNew(() =>
+                    {
+                        foreach (var item in batch)
+                        {
+                            GetDataNovel(item.PathNovel, pathSave);
+                        }
+                    });
+                    tasks.Add(task);
+                }
+                Task.WaitAll(tasks.ToArray());
+                WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}", dicNovel);
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"Error while in setup multithread to ReCrawl Novel, msg: {ex}");
+            }
+
+            logger.Info("Start ReCrawl Novel Error");
+            try
+            {
+                var currentTaskCount = chapterError.Count / numberBatch + (chapterError.Count % numberBatch > 0 ? 1 : 0);
+                var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (chapterError.Count / RuntimeContext.MaxThraed + (chapterError.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
+                var tasks = new List<Task>();
+                foreach (var batch in chapterError.Chunk(batchNumber))
+                {
+                    var task = Task.Factory.StartNew(() =>
+                    {
+                        foreach (var item in batch)
+                        {
+                            IWebDriver webDriver = NewWebClient.GetInstantWebDriver();
+                            GetContentChapter("", item.ChapterNumber, item.PathNovel, pathSave, webDriver);
+                        }
+                    });
+                    tasks.Add(task);
+                }
+                Task.WaitAll(tasks.ToArray());
+                //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}", dicNovel);
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"Error while in setup multithread to ReCrawl chapter, msg: {ex}");
+            }
+
+        }
 
 
         public async Task GetDataNovel(string pathNovel, string pathSave)
         {
-            if(string.IsNullOrEmpty(pathNovel)) return;
+            if (string.IsNullOrEmpty(pathNovel)) return;
             try
             {
                 int chapterNumber = 1;
                 pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
-                var webClient = new WebClient();
-                var html = webClient.CreateWebClient().DownloadString(pathNovel);
+                IWebDriver webDriver = NewWebClient.GetInstantWebDriver();
+                var html = webDriver.GetWebBySelenium(pathNovel);
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
                 var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText;
@@ -98,7 +157,7 @@ namespace CrawlDataService.Service
                 var controlBtnNode = htmlDoc.GetHtmlNode("div", "class", "control-btns");
                 var tagA = controlBtnNode?.GetListHtmlNode("a", "class", "btn waves-effect waves-light orange-btn");
                 var hrefValue = tagA?.FirstOrDefault(e => e.InnerText.Equals("Đọc"))?.Attributes["href"].Value;
-                var pathFolder = WriteFileTxt.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
 
                 var novel = new Novel
                 {
@@ -113,8 +172,12 @@ namespace CrawlDataService.Service
                 {
                     dicNovel.Add(nameNovel, novel);
                 }
-                await GetContentChapter(nameNovel, chapterNumber, pathFolder, hrefValue);
+                await GetContentChapter(nameNovel, chapterNumber, pathFolder, hrefValue, webDriver);
+
+                WriteFile.WriteFileTxt(nameNovel);
                 logger.Info($"End crawl data novel {nameNovel}");
+                webDriver.Quit();
+
             }
             catch (Exception ex)
             {
@@ -122,8 +185,8 @@ namespace CrawlDataService.Service
                 chapterLog.Info(PropertyExtension.FormatErrorChapter(true, pathNovel, 0, null, null));
             }
         }
-        
-        public async Task GetContentChapter(string nameNovel, int chaper, string pathSave, string? pathChapter)
+
+        public async Task GetContentChapter(string nameNovel, int chaper, string pathSave, string? pathChapter, IWebDriver webDriver)
         {
             if (string.IsNullOrEmpty(pathChapter)) return;
             pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
@@ -131,25 +194,37 @@ namespace CrawlDataService.Service
             try
             {
                 logger.Info($"Start crawl novel:{nameNovel}, chapter: {chaper}");
-                var webClient = new WebClient();
-                var html = webClient.CreateWebClient().DownloadString(pathChapter);
                 HtmlDocument htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(html);
-                var titleChapter = htmlDoc.DocumentNode.Descendants("title").FirstOrDefault()?.InnerText.Split("-")[1];
+                string titleChapter = "";
+                do
+                {
+                    var html = webDriver.GetWebBySelenium(pathChapter);
+                    htmlDoc.LoadHtml(html);
+                    var titleChapters = htmlDoc.DocumentNode.Descendants("title").FirstOrDefault()?.InnerText.Split("-");
+                    titleChapter = titleChapters?.Count() > 1 ? titleChapters[1] : titleChapters?.Count() > 0 ? titleChapters[0] : $"Chuong {chaper}";
+                    if (titleChapter.Equals("503 Service Temporarily Unavailable", StringComparison.OrdinalIgnoreCase)) 
+                    {
+                        Thread.Sleep(5000);
+                        logger.Warn($"Sleep 5s, {titleChapter}");
+                    } 
+                } while (titleChapter.Equals("503 Service Temporarily Unavailable", StringComparison.OrdinalIgnoreCase));
                 var contentDoc = htmlDoc.GetHtmlNode("div", "class", "content-body-wrapper");
                 var contentNodes = contentDoc?.GetHtmlNode("div", "id", "bookContentBody");
                 var content = GetContentFromHTML(contentNodes);
-                WriteFileTxt.WriteFile(pathSave, titleChapter.RemoveDiacriticsAndSpaces(), content);
+                WriteFile.WriteFileTxt(pathSave, titleChapter.RemoveDiacriticsAndSpaces(), content);
                 var indexBox = htmlDoc.GetHtmlNode("span", "class", "index-box");
                 var tagA = indexBox?.GetHtmlNode("a", "id", "btnNextChapter");
                 var nextChapterPath = $"{pathWeb}{tagA?.Attributes["href"].Value}";
-                Thread.Sleep(3000 * RuntimeContext.MaxThraed);
-                await GetContentChapter(nameNovel, chaper += 1, pathSave, nextChapterPath);
+                //Thread.Sleep(3000 * RuntimeContext.MaxThraed);
+                await GetContentChapter(nameNovel, chaper += 1, pathSave, nextChapterPath, webDriver);
+                webDriver.Quit();
+                return;
             }
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {nameNovel}, chapter: {chaper}, msg: {ex}");
                 chapterLog.Info(PropertyExtension.FormatErrorChapter(false, null, chaper, pathChapter, pathSave));
+                return;
             }
         }
 

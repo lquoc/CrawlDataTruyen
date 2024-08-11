@@ -37,6 +37,7 @@
             label3 = new Label();
             btnFolder = new Button();
             txtFolderPath = new TextBox();
+            btnReCrawl = new Button();
             SuspendLayout();
             // 
             // btn_Start
@@ -116,11 +117,22 @@
             txtFolderPath.Size = new Size(293, 27);
             txtFolderPath.TabIndex = 7;
             // 
+            // btnReCrawl
+            // 
+            btnReCrawl.Location = new Point(165, 230);
+            btnReCrawl.Name = "btnReCrawl";
+            btnReCrawl.Size = new Size(94, 29);
+            btnReCrawl.TabIndex = 8;
+            btnReCrawl.Text = "ReCrawl";
+            btnReCrawl.UseVisualStyleBackColor = true;
+            btnReCrawl.Click += btnReCrawl_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1123, 487);
+            Controls.Add(btnReCrawl);
             Controls.Add(txtFolderPath);
             Controls.Add(btnFolder);
             Controls.Add(label3);
@@ -146,5 +158,6 @@
         private Label label3;
         private Button btnFolder;
         private TextBox txtFolderPath;
+        private Button btnReCrawl;
     }
 }
