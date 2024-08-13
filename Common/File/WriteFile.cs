@@ -69,6 +69,10 @@ namespace Common
             try
             {
                 var newFolderName = nameFile.RemoveInvalidPathChars();
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path.Replace("\\\\", "\\"));
+                }
                 var pathCombine = Path.Combine(path, newFolderName);
                 using (StreamWriter writer = new StreamWriter($"{pathCombine}.txt"))
                 {

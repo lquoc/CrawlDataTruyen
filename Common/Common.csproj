@@ -12,6 +12,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Repository\Repository.csproj" />
+    <PackageReference Include="Selenium.Support" Version="4.0.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.18.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="122.0.6261.3900-beta" />
+    <PackageReference Include="Selenium.WebDriver.MicrosoftWebDriver" Version="10.0.17134" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Log\nlog.dev.config">

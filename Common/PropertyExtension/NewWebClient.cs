@@ -1,8 +1,7 @@
-﻿using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Edge;
 using System.Net;
 using System.Text;
-using OpenQA.Selenium.Interactions;
 
 namespace CrawlDataService.Common
 {
@@ -15,16 +14,16 @@ namespace CrawlDataService.Common
             //ChangeProxy(webClient);
             return webClient;
         }
-        
+
         public static IWebDriver GetInstantWebDriver()
         {
-            ChromeOptions options = new ChromeOptions();
+            EdgeOptions options = new EdgeOptions();
             options.AddArgument("--headless");
             options.AddArgument("--log-level=3");
             options.AddArgument("--silent");
-            return new ChromeDriver(options);
+            return new EdgeDriver(options);
         }
-        
+
         public static string GetWebBySelenium(this IWebDriver driver, string path)
         {
             driver.Navigate().GoToUrl(path);

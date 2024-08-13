@@ -1,6 +1,9 @@
 ﻿
+using CrawlDataService.Common;
 using HtmlAgilityPack;
+using NLog;
 using System.Globalization;
+using System.Net;
 using System.Text;
 
 namespace Common
@@ -88,6 +91,26 @@ namespace Common
         public static string FormatErrorChapter(bool isNovelError, string? pathNovel, int chapterNumber, string? pathChapter, string? pathChapterLocal)
         {
             return $"IsNovelError: {isNovelError}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
+        }
+
+        public static string DownloadStringWebClient(this string path)
+        {
+            var html = "";
+            do
+            {
+                try
+                {
+                    Thread.Sleep(1000);
+                    WebClient webClient = new WebClient();
+                    html = webClient.CreateWebClient().DownloadString(path);
+                }
+                catch (Exception ex)
+                {
+                    RuntimeContext.logger.Warn($"Sleep 5s, msg: {ex.Message}");
+                    Thread.Sleep(2000 * RuntimeContext.MaxThraed);
+                }
+            } while (string.IsNullOrEmpty(html));
+            return html;
         }
 
     }
