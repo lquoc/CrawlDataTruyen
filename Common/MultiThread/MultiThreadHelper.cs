@@ -44,6 +44,33 @@ namespace Common.MultiThread
             Task.WaitAll(tasks.ToArray());
         }
 
+        public static void MultiThreadParralle(this List<string>? listPathChapter,int numberBatch,string novelName, string pathSave, Func<string, int, string, string, Task> action)
+        {
+            if (listPathChapter?.Count == 0) return;
+            var concurrentTaskCount = listPathChapter.Count / numberBatch + (listPathChapter.Count % numberBatch > 0 ? 1 : 0);
+            Task.Run(() =>
+            {
+                var option = new ParallelOptions()
+                {
+                    MaxDegreeOfParallelism = concurrentTaskCount,
+                };
+                int tamp = 0;
+                Parallel.ForEach(listPathChapter, option, e =>
+                {
+                    action(novelName, tamp++, pathSave, e);
+                });
+            });
+        }
+
+        public static void SingleForEach(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, Func<string, int, string, string, Task> action)
+        {
+            if (listPathChapter?.Count == 0) return;
+            int tamp = 0;
+            listPathChapter?.ForEach(e =>
+            {
+                action(novelName, tamp++, pathSave, e);
+            });
+        }
 
     }
 }

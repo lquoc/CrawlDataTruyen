@@ -11,7 +11,7 @@ namespace CrawlDataTruyen
         public Form1()
         {
             InitializeComponent();
-            txtLinkCrawl.Text = "/tim-kiem?status=5794f03dd7ced228f4419191&qs=1&m=8&q=&start=0&so=1&y=2024&vo=1";
+            txtLinkCrawl.Text = "/tim-kiem?status=5794f03dd7ced228f4419191&qs=1&m=8&q=&start=20&so=1&y=2024&vo=1";
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -70,7 +70,7 @@ namespace CrawlDataTruyen
             var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<GetDataFromWebService>();
             Task.Run(async () =>
             {
-                await getDataFromWebService.StartReCrawData(1, errorNovel, errorChaper, txtFolderPath.Text);
+                await getDataFromWebService.StartReCrawData(RuntimeContext.numberBatch, errorNovel, errorChaper, txtFolderPath.Text);
             });
         }
     }

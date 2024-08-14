@@ -87,34 +87,56 @@ namespace CrawlDataService.Service
 
         }
 
-        public async Task<List<string>> GetAllChapterLink(string idNovel, string signKey)
+        public async Task<List<string>> GetAllChapterLink(string novelName, string idNovel, string signKey, int numberFuzzy)
         {
             var startChapter = 0;
             var size = 501;
-            var check = signKey + startChapter.ToString() + size.ToString();
-            var sign = check.FuzzySign().SignFunc();
             var isTrue = true;
+            var lastChapter = 0;
+            List<string> allChapterPath = new();
             while (isTrue)
             {
+                logger.Info($"Start get chapter of novel name:{novelName}, start:{startChapter}, size: {size}");
+                var sign = (signKey + startChapter.ToString() + size.ToString()).FuzzySign(numberFuzzy).SignFunc();
                 var linkIndexChapter = $"https://truyenwikidich.net/book/index?bookId={idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
                 string html = "";
                 try
                 {
-                    linkIndexChapter.DownloadStringWeb();
-                }catch (Exception ex)
-                {
-                    logger.Error("Test thoi");
+
+                    html = linkIndexChapter.DownloadStringWebClient();
+                    HtmlDocument htmlDoc = new HtmlDocument();
+                    htmlDoc.LoadHtml(html);
+                    var listTagLi = htmlDoc.GetListHtmlNode("li", "class", "chapter-name");
+                    var listTagA = listTagLi?.GetListHtmlNode("a", "class", "truncate");
+                    var getHrefValue = listTagA?.Select(e => e.Attributes["href"].Value).ToList();
+                    if(lastChapter == 0)
+                    {
+                        var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
+                        var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
+                        var lastPage = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-double-right").Any())
+                            .Select(e => e.Descendants("a").FirstOrDefault().Attributes["data-start"].Value).FirstOrDefault();
+                        if(int.TryParse(lastPage, out var number))
+                            lastChapter = number;
+                    }
+                    allChapterPath.AddRange(getHrefValue);
+                    logger.Info($"End get chapter of novel id:{idNovel}, start:{startChapter}, size: {size}");
                 }
-                if(string.IsNullOrEmpty(html))
+                catch (Exception ex)
+                {
+                    logger.Error($"Error while get path chapter of novel {novelName}");
+                }
+                
+                if(string.IsNullOrEmpty(html) || startChapter == lastChapter)
                 {
                     isTrue = false;
+                    logger.Info($"End get chapter of novel id:{idNovel}");
                 }
                 else
                 {
                     startChapter += size;
                 }
             }
-            return null;
+            return allChapterPath;
         }
 
         public async Task GetDataNovel(string pathNovel, string pathSave)
@@ -129,14 +151,19 @@ namespace CrawlDataService.Service
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
+                //get name of novel
+                var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText;
+
                 //get novel id
                 var Idbook = htmlDoc.GetHtmlNode("input", "id", "bookId").Attributes["Value"].Value;
 
                 //get signKey
                 var signKey = htmlDoc.GetSignInKey();
-                await GetAllChapterLink(Idbook, signKey);
-                //get name of novel
-                var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText;
+
+                //get function fuzzy
+                int numberFuzzy = htmlDoc.GetNumberFuzzy();
+                var allChapter = await GetAllChapterLink(nameNovel, Idbook, signKey, numberFuzzy);
+
 
                 //get gener of novel
                 var nodeDesc = htmlDoc.GetHtmlNode("div", "class", "book-desc");
@@ -159,6 +186,8 @@ namespace CrawlDataService.Service
 
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
 
+                allChapter.SingleForEach(RuntimeContext.numberBatch, nameNovel, pathFolder, GetContentChapter);
+
                 var novel = new Novel
                 {
                     Name = nameNovel,
@@ -172,7 +201,6 @@ namespace CrawlDataService.Service
                 {
                     dicNovel.Add(nameNovel, novel);
                 }
-                //await GetContentChapter(nameNovel, chapterNumber, pathFolder, hrefValue);
 
                 WriteFile.WriteFileTxt(nameNovel);
                 logger.Info($"End crawl data novel {nameNovel}");
@@ -208,14 +236,6 @@ namespace CrawlDataService.Service
                 var contentNodes = contentDoc?.GetHtmlNode("div", "id", "bookContentBody");
                 var content = GetContentFromHTML(contentNodes);
                 WriteFile.WriteFileTxt(pathSave, titleChapter.RemoveDiacriticsAndSpaces(), content);
-
-                //get link in  btnNext Chapter
-                var indexBox = htmlDoc.GetHtmlNode("span", "class", "index-box");
-                var tagA = indexBox?.GetHtmlNode("a", "id", "btnNextChapter");
-                var nextChapterPath = $"{pathWeb}{tagA?.Attributes["href"].Value}";
-
-                await GetContentChapter(nameNovel, chaper += 1, pathSave, nextChapterPath);
-                //webDriver.Quit();
                 return;
             }
             catch (Exception ex)

@@ -12,5 +12,6 @@ namespace Common
         public static string PathChapterError = Path.Combine(AppContext.BaseDirectory, "errorchapterlogs","chapterError.log");
         public static string NameFileNovelList = "novelList.txt";
         public static string PathSaveLocal = "";
+        public static int numberBatch = 1000;
     }
 }
