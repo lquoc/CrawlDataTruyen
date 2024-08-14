@@ -63,21 +63,7 @@ namespace CrawlDataService.Service
             {
                 try
                 {
-                    var currentTaskCount = novelError.Count / numberBatch + (novelError.Count % numberBatch > 0 ? 1 : 0);
-                    var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (novelError.Count / RuntimeContext.MaxThraed + (novelError.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
-                    var tasks = new List<Task>();
-                    foreach (var batch in novelError.Chunk(batchNumber))
-                    {
-                        var task = Task.Factory.StartNew(() =>
-                        {
-                            foreach (var item in batch)
-                            {
-                                GetDataNovel(item.PathNovel, pathSave);
-                            }
-                        });
-                        tasks.Add(task);
-                    }
-                    Task.WaitAll(tasks.ToArray());
+                    MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, GetDataNovel);
                     WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
                 }
                 catch (Exception ex)
@@ -90,23 +76,7 @@ namespace CrawlDataService.Service
                 logger.Info("Start ReCrawl Chapter Error");
                 try
                 {
-                    var currentTaskCount = chapterError.Count / numberBatch + (chapterError.Count % numberBatch > 0 ? 1 : 0);
-                    var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (chapterError.Count / RuntimeContext.MaxThraed + (chapterError.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
-                    var tasks = new List<Task>();
-                    foreach (var batch in chapterError.Chunk(batchNumber))
-                    {
-                        var task = Task.Factory.StartNew(() =>
-                        {
-                            foreach (var item in batch)
-                            {
-                                //IWebDriver webDriver = NewWebClient.GetInstantWebDriver();
-                                GetContentChapter("", item.ChapterNumber, item.PathChapterLocal, item.PathChapter);
-                            }
-                        });
-                        tasks.Add(task);
-                    }
-                    Task.WaitAll(tasks.ToArray());
-                    //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}", dicNovel);
+                    chapterError.MultiThread(numberBatch, GetContentChapter);
                 }
                 catch (Exception ex)
                 {
@@ -117,6 +87,35 @@ namespace CrawlDataService.Service
 
         }
 
+        public async Task<List<string>> GetAllChapterLink(string idNovel, string signKey)
+        {
+            var startChapter = 0;
+            var size = 501;
+            var check = signKey + startChapter.ToString() + size.ToString();
+            var sign = check.FuzzySign().SignFunc();
+            var isTrue = true;
+            while (isTrue)
+            {
+                var linkIndexChapter = $"https://truyenwikidich.net/book/index?bookId={idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
+                string html = "";
+                try
+                {
+                    linkIndexChapter.DownloadStringWeb();
+                }catch (Exception ex)
+                {
+                    logger.Error("Test thoi");
+                }
+                if(string.IsNullOrEmpty(html))
+                {
+                    isTrue = false;
+                }
+                else
+                {
+                    startChapter += size;
+                }
+            }
+            return null;
+        }
 
         public async Task GetDataNovel(string pathNovel, string pathSave)
         {
@@ -126,12 +125,16 @@ namespace CrawlDataService.Service
                 int chapterNumber = 1;
                 pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
 
-                //string html = pathNovel.DownloadStringWebClient();
-                IWebDriver webDriver = NewWebClient.GetInstantWebDriver();
-                var html = webDriver.GetWebBySelenium(pathNovel);
+                string html = pathNovel.DownloadStringWebClient();
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
+                //get novel id
+                var Idbook = htmlDoc.GetHtmlNode("input", "id", "bookId").Attributes["Value"].Value;
+
+                //get signKey
+                var signKey = htmlDoc.GetSignInKey();
+                await GetAllChapterLink(Idbook, signKey);
                 //get name of novel
                 var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText;
 
@@ -169,7 +172,7 @@ namespace CrawlDataService.Service
                 {
                     dicNovel.Add(nameNovel, novel);
                 }
-                await GetContentChapter(nameNovel, chapterNumber, pathFolder, hrefValue);
+                //await GetContentChapter(nameNovel, chapterNumber, pathFolder, hrefValue);
 
                 WriteFile.WriteFileTxt(nameNovel);
                 logger.Info($"End crawl data novel {nameNovel}");
@@ -178,7 +181,7 @@ namespace CrawlDataService.Service
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {pathNovel}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, pathNovel, 0, null, null));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, null, pathNovel, 0, null, null));
             }
         }
 
@@ -218,7 +221,7 @@ namespace CrawlDataService.Service
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {nameNovel}, chapter: {chaper}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, null, chaper, pathChapter, pathSave));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, nameNovel, null, chaper, pathChapter, pathSave));
                 return;
             }
         }

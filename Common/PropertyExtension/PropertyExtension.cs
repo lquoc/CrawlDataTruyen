@@ -1,11 +1,10 @@
-﻿
-using CrawlDataService.Common;
+﻿using CrawlDataService.Common;
 using HtmlAgilityPack;
-using NLog;
+using Jint;
 using System.Globalization;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
-
 namespace Common
 {
     public static class PropertyExtension
@@ -84,13 +83,20 @@ namespace Common
             if (!path.Contains(Constant.PathWeb))
             {
                 return path = $"{Constant.PathWeb}{path}";
-            }          
+            }
             return path;
         }
 
-        public static string FormatErrorChapter(bool isNovelError, string? pathNovel, int chapterNumber, string? pathChapter, string? pathChapterLocal)
+        public static string FormatErrorChapter(bool isNovelError, string novelName, string? pathNovel, int chapterNumber, string? pathChapter, string? pathChapterLocal)
         {
-            return $"IsNovelError: {isNovelError}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
+            return $"IsNovelError: {isNovelError}{Constant.Seperation} NovelName: {novelName}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
+        }
+
+
+        public static string DownloadStringWeb(this string path)
+        {
+            WebClient webClient = new WebClient();
+            return webClient.CreateWebClient().DownloadString(path);
         }
 
         public static string DownloadStringWebClient(this string path)
@@ -113,5 +119,183 @@ namespace Common
             return html;
         }
 
+        public static string GetSignInKey(this HtmlDocument htmlDoc)
+        {
+            var scriptNodes = htmlDoc.DocumentNode.SelectNodes("//script");
+            string signKey = null;
+            foreach (var scriptNode in scriptNodes)
+            {
+                var scriptContent = scriptNode.InnerText;
+                var keyIndex = scriptContent.IndexOf("signKey = \"");
+                if (keyIndex != -1)
+                {
+                    // Find the start and end of the signKey value
+                    var start = keyIndex + "signKey = \"".Length;
+                    var end = scriptContent.IndexOf("\"", start);
+                    signKey = scriptContent.Substring(start, end - start);
+                    break;
+                }
+            }
+            return signKey;
+        }
+        public static string FuzzySign(this string text)
+        {
+            string result = text.Substring(12) + text.Substring(0, 12);
+            return result;
+        }
+
+        public static string SignFunc(this string text)
+        {
+            var engine = new Engine();
+            string script = @"
+            var signFunc = function a(W) {
+                function V(d, c) {
+                    return d >>> c | d << 32 - c
+                }
+                for (var U, T, S = Math.pow, R = S(2, 32), Q = ""length"", P = """", O = [], N = 8 * W[Q], M = a.h = a.h || [], L = a.k = a.k || [], K = L[Q], J = {}, I = 2; 64 > K; I++) {
+                    if (!J[I]) {
+                        for (U = 0; 313 > U; U += I) {
+                            J[U] = I
+                        }
+                        M[K] = S(I, 0.5) * R | 0,
+                        L[K++] = S(I, 1 / 3) * R | 0
+                    }
+                }
+                for (W += ""\x80""; W[Q] % 64 - 56; ) {
+                    W += ""\x00""
+                }
+                for (U = 0; U < W[Q]; U++) {
+                    if (T = W.charCodeAt(U),
+                    T >> 8) {
+                        return
+                    }
+                    O[U >> 2] |= T << (3 - U) % 4 * 8
+                }
+                for (O[O[Q]] = N / R | 0,
+                O[O[Q]] = N,
+                T = 0; T < O[Q]; ) {
+                    var H = O.slice(T, T += 16)
+                      , G = M;
+                    for (M = M.slice(0, 8),
+                    U = 0; 64 > U; U++) {
+                        var F = H[U - 15]
+                          , E = H[U - 2]
+                          , D = M[0]
+                          , C = M[4]
+                          , B = M[7] + (V(C, 6) ^ V(C, 11) ^ V(C, 25)) + (C & M[5] ^ ~C & M[6]) + L[U] + (H[U] = 16 > U ? H[U] : H[U - 16] + (V(F, 7) ^ V(F, 18) ^ F >>> 3) + H[U - 7] + (V(E, 17) ^ V(E, 19) ^ E >>> 10) | 0)
+                          , A = (V(D, 2) ^ V(D, 13) ^ V(D, 22)) + (D & M[1] ^ D & M[2] ^ M[1] & M[2]);
+                        M = [B + A | 0].concat(M),
+                        M[4] = M[4] + B | 0
+                    }
+                    for (U = 0; 8 > U; U++) {
+                        M[U] = M[U] + G[U] | 0
+                    }
+                }
+                for (U = 0; 8 > U; U++) {
+                    for (T = 3; T + 1; T--) {
+                        var z = M[U] >> 8 * T & 255;
+                        P += (16 > z ? 0 : """") + z.toString(16)
+                    }
+                }
+                return P
+            };";
+            engine.Execute(script);
+            var result = engine.Invoke("signFunc", text).ToString();
+            return result;
+
+        }
+
+
+        // Hàm signFunc sử dụng SHA-256
+        public static string SignFunchaa(this string W)
+        {
+            uint V(uint d, int c)
+            {
+                return (d >> c) | (d << (32 - c));
+            }
+            double S(double x, double y) => Math.Pow(x, y);
+            var R = (uint)Math.Pow(2, 32);
+            var P = new StringBuilder();
+            var O = new uint[64];
+            var N = 8 * W.Length;
+            var M = new uint[8];
+            var L = new uint[64];
+            var J = new bool[313];
+            int K = 0, I = 2;
+            // Initialize M and L arrays
+            while (K < 64)
+            {
+                if (!J[I])
+                {
+                    for (int U = 0; U < 313; U += I)
+                    {
+                        J[U] = true;
+                    }
+                    M[K] = (uint)(Math.Pow(I, 0.5) * R);
+                    L[K++] = (uint)(Math.Pow(I, 1.0 / 3.0) * R);
+                }
+                I++;
+            }
+
+            // Padding W
+            W += "\x80";
+            while ((W.Length % 64) != 56)
+            {
+                W += "\x00";
+            }
+
+            // Convert W to an array of uint
+            for (int U = 0; U < W.Length; U++)
+            {
+                int T = W[U];
+                if (T >> 8 > 0)
+                {
+                    return null;
+                }
+                O[U >> 2] |= (uint)T << ((3 - U) % 4 * 8);
+            }
+
+            O[W.Length >> 2] |= (uint)(N / R);
+            O[(W.Length >> 2) + 1] = (uint)N;
+
+            for (int T = 0; T < O.Length;)
+            {
+                var H = O.Skip(T).Take(16).ToArray();
+                T += 16;
+                var G = M.ToArray();
+                M = M.Take(8).ToArray();
+
+                for (int U = 0; U < 64; U++)
+                {
+                    var F = H[U - 15];
+                    var E = H[U - 2];
+                    var D = M[0];
+                    var C = M[4];
+
+                    var temp1 = M[7] + (V(C, 6) ^ V(C, 11) ^ V(C, 25)) + ((C & M[5]) ^ (~C & M[6])) + L[U] + (H[U] = (U < 16) ? H[U] : (H[U - 16] + (V(F, 7) ^ V(F, 18) ^ (F >> 3)) + H[U - 7] + (V(E, 17) ^ V(E, 19) ^ (E >> 10))));
+                    var temp2 = (V(D, 2) ^ V(D, 13) ^ V(D, 22)) + ((D & M[1]) ^ (D & M[2]) ^ (M[1] & M[2]));
+
+                    M = new uint[] { temp1 + temp2 }.Concat(M).ToArray();
+                    M[4] = M[4] + temp1;
+                }
+
+                for (int U = 0; U < 8; U++)
+                {
+                    M[U] = M[U] + G[U];
+                }
+            }
+
+            // Convert M to hexadecimal string
+            for (int U = 0; U < 8; U++)
+            {
+                for (int T = 3; T >= 0; T--)
+                {
+                    var z = (M[U] >> (8 * T)) & 255;
+                    P.Append(z.ToString("x2"));
+                }
+            }
+
+            return P.ToString();
+        }
     }
 }

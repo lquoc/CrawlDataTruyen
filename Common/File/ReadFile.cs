@@ -68,6 +68,9 @@ namespace Common
                             case "IsNovelError":
                                 chapterErrorLog.IsNovelError = bool.Parse(value);
                                 break;
+                            case "NovelName":
+                                chapterErrorLog.NovelName = value;
+                                break;
                             case "PathNovel":
                                 chapterErrorLog.PathNovel = value;
                                 break;
