@@ -8,11 +8,11 @@ namespace Common
     public class WriteFile
     {
         private static MyLogger logger = MyLogger.GetInstance();
-        public static void WriteFileTxt(string nameNovel)
+        public static void WriteFileTxt(string contentFile)
         {
             var pathCombine = Path.Combine(RuntimeContext.PathSaveLocal, RuntimeContext.NameFileNovelList);
-            File.AppendAllText(pathCombine, nameNovel + Environment.NewLine);
-            logger.Info($"Add a novel into NovelList {nameNovel}");
+            File.AppendAllText(pathCombine, contentFile + Environment.NewLine);
+            logger.Info($"Add a novel into NovelList {contentFile}");
         }
 
         public static void WriteFileXLSX(string path, string nameFile, Dictionary<string, Novel> dicResult)

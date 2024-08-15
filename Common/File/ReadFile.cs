@@ -14,7 +14,7 @@ namespace Common
                 string[] logLines = File.ReadAllLines(path);
                 foreach (string line in logLines)
                 {
-                    novelNames.Add(line);
+                    novelNames.Add(line.Split("|")[0]);
                 }
             }
             else

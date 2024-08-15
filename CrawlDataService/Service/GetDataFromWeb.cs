@@ -48,7 +48,7 @@ namespace CrawlDataService.Service
                 novelCrawled = ReadFile.ReadFileTxt();
                 listPathNovel = listPathNovel.Where(x => !novelCrawled.Contains(x)).ToList();
                 MultiThreadHelper.MultiThread(listPathNovel, numberBatch, pathSave, GetDataNovel);
-                WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
+                //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
             }
             catch (Exception ex)
             {
@@ -97,8 +97,10 @@ namespace CrawlDataService.Service
             while (isTrue)
             {
                 logger.Info($"Start get chapter of novel name:{novelName}, start:{startChapter}, size: {size}");
+                
+                //create sign value and path index.
                 var sign = (signKey + startChapter.ToString() + size.ToString()).FuzzySign(numberFuzzy).SignFunc();
-                var linkIndexChapter = $"https://truyenwikidich.net/book/index?bookId={idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
+                var linkIndexChapter = $"{pathIndex}{idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
                 string html = "";
                 try
                 {
@@ -106,17 +108,21 @@ namespace CrawlDataService.Service
                     html = linkIndexChapter.DownloadStringWebClient();
                     HtmlDocument htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(html);
+                    //get link of chapter
                     var listTagLi = htmlDoc.GetListHtmlNode("li", "class", "chapter-name");
                     var listTagA = listTagLi?.GetListHtmlNode("a", "class", "truncate");
                     var getHrefValue = listTagA?.Select(e => e.Attributes["href"].Value).ToList();
+                    
+                    //get index last chapter
                     if(lastChapter == 0)
                     {
                         var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
                         var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
-                        var lastPage = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-double-right").Any())
-                            .Select(e => e.Descendants("a").FirstOrDefault().Attributes["data-start"].Value).FirstOrDefault();
-                        if(int.TryParse(lastPage, out var number))
-                            lastChapter = number;
+                        effectNodes?.AddRange(pageNode?.GetListHtmlNode("li","class", " waves-effect "));
+                        var numberPathOfEffects = effectNodes?.Select(e => e.GetHtmlNode("a", "data-action", "loadBookIndex")?.Attributes["data-start"].Value).ToList();
+                        var lastPage = numberPathOfEffects?.Where(e => !string.IsNullOrEmpty(e)).Select(e => int.Parse(e)).ToList().Max();
+                        if(lastPage != null)
+                            lastChapter = lastPage.Value;
                     }
                     allChapterPath.AddRange(getHrefValue);
                     logger.Info($"End get chapter of novel id:{idNovel}, start:{startChapter}, size: {size}");
@@ -164,7 +170,9 @@ namespace CrawlDataService.Service
                 int numberFuzzy = htmlDoc.GetNumberFuzzy();
                 var allChapter = await GetAllChapterLink(nameNovel, Idbook, signKey, numberFuzzy);
 
-
+                //get path img of novel
+                var imgNode = htmlDoc.GetHtmlNode("ing", "class", "z-depth-1 materialboxed");
+                var imgPath = imgNode?.Attributes["src"].Value;
                 //get gener of novel
                 var nodeDesc = htmlDoc.GetHtmlNode("div", "class", "book-desc");
                 var listGener = nodeDesc?.Descendants("p").FirstOrDefault()?.Descendants("a").Select(e => e.InnerText);
@@ -192,7 +200,7 @@ namespace CrawlDataService.Service
                 {
                     Name = nameNovel,
                     Genre = gener,
-                    NumberChapter = "",
+                    NumberChapter = allChapter.Count().ToString(),
                     Author = author,
                     Description = description,
                     Path = pathFolder
@@ -202,7 +210,7 @@ namespace CrawlDataService.Service
                     dicNovel.Add(nameNovel, novel);
                 }
 
-                WriteFile.WriteFileTxt(nameNovel);
+                WriteFile.WriteFileTxt(novel.GetString());
                 logger.Info($"End crawl data novel {nameNovel}");
 
             }
