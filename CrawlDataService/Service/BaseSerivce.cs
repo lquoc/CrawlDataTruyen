@@ -10,6 +10,5 @@ namespace CrawlDataService.Service
         public ChapterErrorLogger chapterLog = ChapterErrorLogger.GetInstance();
         public string pathWeb = "https://truyenwikidich.net";
         public string pathIndex = "https://truyenwikidich.net/book/index?bookId=";
-        public Dictionary<string, Novel> dicNovel = new Dictionary<string, Novel>();
     }
 }

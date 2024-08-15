@@ -64,7 +64,7 @@ namespace CrawlDataService.Service
                 try
                 {
                     MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, GetDataNovel);
-                    WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
+                    //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
                 }
                 catch (Exception ex)
                 {
@@ -203,13 +203,9 @@ namespace CrawlDataService.Service
                     NumberChapter = allChapter.Count().ToString(),
                     Author = author,
                     Description = description,
+                    ImgPath = imgPath,
                     Path = pathFolder
                 };
-                if (!dicNovel.ContainsKey(nameNovel))
-                {
-                    dicNovel.Add(nameNovel, novel);
-                }
-
                 WriteFile.WriteFileTxt(novel.GetString());
                 logger.Info($"End crawl data novel {nameNovel}");
 
