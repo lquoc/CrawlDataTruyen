@@ -7,10 +7,19 @@ using System.Text;
 
 namespace CrawlDataService.Service
 {
-    public class GetDataFromWebService : BaseSerivce
+    public class CrawlNovelFromWiki : CrawlNovelSerivce
     {
+
         int pageNovel = 1;
         public List<string> listPathNovel = new();
+        public string pathIndex;
+        public string pathWeb;
+        public CrawlNovelFromWiki()
+        {
+            this.pathWeb = "https://truyenwikidich.net";
+            this.pathIndex = "https://truyenwikidich.net/book/index?bookId=";
+        }
+
         public void GetNovelPath(int pageNumber, string pathSearch)
         {
             if (string.IsNullOrEmpty(pathSearch)) return;
@@ -38,7 +47,7 @@ namespace CrawlDataService.Service
             }
         }
 
-        public async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
+        public override async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
         {
             try
             {
@@ -63,7 +72,6 @@ namespace CrawlDataService.Service
                 try
                 {
                     MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, pathSaveVoice, GetDataNovel);
-                    //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
                 }
                 catch (Exception ex)
                 {

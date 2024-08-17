@@ -1,5 +1,7 @@
 ﻿using Common.ErrorNovel;
 using Migration.Common;
+using Repository.Enum;
+using System.Diagnostics;
 
 namespace Common
 {
@@ -9,8 +11,11 @@ namespace Common
         public static MyLogger logger = MyLogger.GetInstance();
         public static ChapterErrorLogger chapterLog = ChapterErrorLogger.GetInstance();
         public static IServiceProvider _serviceProvider;
-        public static int MaxThraed = 3;
-       //crawl data novel
+        public static int MaxThread = 3;
+
+        //crawl data novel
+        public static ListEnum.EnumPage EnumPage = 0;
+        public static string PathCrawl = string.Empty;
         public static string PathChapterError = Path.Combine(AppContext.BaseDirectory, "errorchapterlogs","chapterError.log");
         public static string NameFileNovelList = "novelList.txt";
         public static string PathSaveLocal = string.Empty;

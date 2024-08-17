@@ -8,7 +8,7 @@ namespace Common.MultiThread
         {
             if (data is null || data.Count() == 0) return;
             var currentTaskCount = data.Count / numberBatch + (data.Count % numberBatch > 0 ? 1 : 0);
-            var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (data.Count / RuntimeContext.MaxThraed + (data.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
+            var batchNumber = currentTaskCount > RuntimeContext.MaxThread ? (data.Count / RuntimeContext.MaxThread + (data.Count % RuntimeContext.MaxThread > 0 ? 1 : 0)) : numberBatch;
             var tasks = new List<Task>();
             foreach (var batch in data.Chunk(batchNumber))
             {
@@ -28,7 +28,7 @@ namespace Common.MultiThread
         {
             if (data is null || data.Count() == 0) return;
             var currentTaskCount = data.Count / numberBatch + (data.Count % numberBatch > 0 ? 1 : 0);
-            var batchNumber = currentTaskCount > RuntimeContext.MaxThraed ? (data.Count / RuntimeContext.MaxThraed + (data.Count % RuntimeContext.MaxThraed > 0 ? 1 : 0)) : numberBatch;
+            var batchNumber = currentTaskCount > RuntimeContext.MaxThread ? (data.Count / RuntimeContext.MaxThread + (data.Count % RuntimeContext.MaxThread > 0 ? 1 : 0)) : numberBatch;
             var tasks = new List<Task>();
             foreach (var batch in data.Chunk(batchNumber))
             {

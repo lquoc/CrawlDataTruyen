@@ -42,6 +42,8 @@
             label5 = new Label();
             txtPathFolderVoice = new TextBox();
             btnChoiceFolderVoice = new Button();
+            cboCrawlFromPage = new ComboBox();
+            label4 = new Label();
             SuspendLayout();
             // 
             // btn_Start
@@ -66,11 +68,12 @@
             // 
             // txtLinkCrawl
             // 
-            txtLinkCrawl.Location = new Point(109, 63);
+            txtLinkCrawl.Location = new Point(120, 63);
             txtLinkCrawl.Name = "txtLinkCrawl";
             txtLinkCrawl.PlaceholderText = "Link Crawl";
             txtLinkCrawl.Size = new Size(293, 27);
             txtLinkCrawl.TabIndex = 2;
+            txtLinkCrawl.TextChanged += txtLinkCrawl_TextChanged;
             // 
             // label2
             // 
@@ -83,7 +86,7 @@
             // 
             // txtThreadNumber
             // 
-            txtThreadNumber.Location = new Point(109, 124);
+            txtThreadNumber.Location = new Point(120, 124);
             txtThreadNumber.Name = "txtThreadNumber";
             txtThreadNumber.PlaceholderText = "Số luồng";
             txtThreadNumber.Size = new Size(125, 27);
@@ -105,7 +108,7 @@
             // 
             // btnFolder
             // 
-            btnFolder.Location = new Point(408, 171);
+            btnFolder.Location = new Point(419, 171);
             btnFolder.Name = "btnFolder";
             btnFolder.Size = new Size(128, 29);
             btnFolder.TabIndex = 6;
@@ -115,11 +118,12 @@
             // 
             // txtFolderPath
             // 
-            txtFolderPath.Location = new Point(109, 173);
+            txtFolderPath.Location = new Point(120, 173);
             txtFolderPath.Name = "txtFolderPath";
             txtFolderPath.PlaceholderText = "Path Folder";
             txtFolderPath.Size = new Size(293, 27);
             txtFolderPath.TabIndex = 7;
+            txtFolderPath.TextChanged += txtFolderPath_TextChanged;
             // 
             // btnReCrawl
             // 
@@ -134,17 +138,18 @@
             // cbChangeTextIntoVoice
             // 
             cbChangeTextIntoVoice.AutoSize = true;
-            cbChangeTextIntoVoice.Location = new Point(588, 68);
+            cbChangeTextIntoVoice.Location = new Point(588, 20);
             cbChangeTextIntoVoice.Name = "cbChangeTextIntoVoice";
             cbChangeTextIntoVoice.Size = new Size(251, 24);
             cbChangeTextIntoVoice.TabIndex = 9;
             cbChangeTextIntoVoice.Text = "Chuyển Văn Bản Thành Âm Thanh";
             cbChangeTextIntoVoice.UseVisualStyleBackColor = true;
+            cbChangeTextIntoVoice.CheckedChanged += cbChangeTextIntoVoice_CheckedChanged;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(588, 180);
+            label5.Location = new Point(588, 71);
             label5.Name = "label5";
             label5.Size = new Size(72, 20);
             label5.TabIndex = 12;
@@ -152,15 +157,16 @@
             // 
             // txtPathFolderVoice
             // 
-            txtPathFolderVoice.Location = new Point(669, 173);
+            txtPathFolderVoice.Location = new Point(669, 64);
             txtPathFolderVoice.Name = "txtPathFolderVoice";
             txtPathFolderVoice.PlaceholderText = "Path Folder";
             txtPathFolderVoice.Size = new Size(276, 27);
             txtPathFolderVoice.TabIndex = 13;
+            txtPathFolderVoice.TextChanged += txtPathFolderVoice_TextChanged;
             // 
             // btnChoiceFolderVoice
             // 
-            btnChoiceFolderVoice.Location = new Point(951, 171);
+            btnChoiceFolderVoice.Location = new Point(951, 62);
             btnChoiceFolderVoice.Name = "btnChoiceFolderVoice";
             btnChoiceFolderVoice.Size = new Size(116, 29);
             btnChoiceFolderVoice.TabIndex = 14;
@@ -168,11 +174,31 @@
             btnChoiceFolderVoice.UseVisualStyleBackColor = true;
             btnChoiceFolderVoice.Click += txtChoiceFolderVoice_Click;
             // 
+            // cboCrawlFromPage
+            // 
+            cboCrawlFromPage.FormattingEnabled = true;
+            cboCrawlFromPage.Location = new Point(120, 12);
+            cboCrawlFromPage.Name = "cboCrawlFromPage";
+            cboCrawlFromPage.Size = new Size(151, 28);
+            cboCrawlFromPage.TabIndex = 15;
+            cboCrawlFromPage.SelectedIndexChanged += cboCrawlFromPage_SelectedIndexChanged;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(24, 20);
+            label4.Name = "label4";
+            label4.Size = new Size(84, 20);
+            label4.TabIndex = 16;
+            label4.Text = "Crawl From";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1123, 343);
+            ClientSize = new Size(1093, 343);
+            Controls.Add(label4);
+            Controls.Add(cboCrawlFromPage);
             Controls.Add(btnChoiceFolderVoice);
             Controls.Add(txtPathFolderVoice);
             Controls.Add(label5);
@@ -208,5 +234,7 @@
         private Label label5;
         private TextBox txtPathFolderVoice;
         private Button btnChoiceFolderVoice;
+        private ComboBox cboCrawlFromPage;
+        private Label label4;
     }
 }

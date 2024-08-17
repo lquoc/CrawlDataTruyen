@@ -114,7 +114,7 @@ namespace Common
                 catch (Exception ex)
                 {
                     RuntimeContext.logger.Warn($"Sleep 5s, msg: {ex.Message}");
-                    Thread.Sleep(2000 * RuntimeContext.MaxThraed);
+                    Thread.Sleep(2000 * RuntimeContext.MaxThread);
                 }
             } while (string.IsNullOrEmpty(html));
             return html;
