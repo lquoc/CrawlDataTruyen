@@ -1,8 +1,7 @@
 ﻿using Common;
 using Common.MultiThread;
-using CrawlDataService.Common;
 using HtmlAgilityPack;
-using OpenQA.Selenium;
+using Microsoft.Extensions.DependencyInjection;
 using Repository.Model;
 using System.Text;
 
@@ -39,7 +38,7 @@ namespace CrawlDataService.Service
             }
         }
 
-        public async Task StartCrawlData(int numberBatch, string pathSave, string pathSearch)
+        public async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
         {
             try
             {
@@ -47,7 +46,7 @@ namespace CrawlDataService.Service
                 HashSet<string> novelCrawled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 novelCrawled = ReadFile.ReadFileTxt();
                 listPathNovel = listPathNovel.Where(x => !novelCrawled.Contains(x)).ToList();
-                MultiThreadHelper.MultiThread(listPathNovel, numberBatch, pathSave, GetDataNovel);
+                MultiThreadHelper.MultiThread(listPathNovel, numberBatch, pathSave, pathSaveVoice, GetDataNovel);
                 //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
             }
             catch (Exception ex)
@@ -56,14 +55,14 @@ namespace CrawlDataService.Service
             }
         }
 
-
-        public async Task StartReCrawData(int numberBatch, List<ChapterErrorLog> novelError, List<ChapterErrorLog> chapterError, string pathSave)
+        //todo
+        public async Task StartReCrawData(int numberBatch, List<ChapterErrorLog> novelError, List<ChapterErrorLog> chapterError, string pathSave, string pathSaveVoice)
         {
             if (novelError?.Count > 0)
             {
                 try
                 {
-                    MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, GetDataNovel);
+                    MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, pathSaveVoice, GetDataNovel);
                     //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
                 }
                 catch (Exception ex)
@@ -76,7 +75,7 @@ namespace CrawlDataService.Service
                 logger.Info("Start ReCrawl Chapter Error");
                 try
                 {
-                    chapterError.MultiThread(numberBatch, GetContentChapter);
+                    chapterError.MultiThread(numberBatch, RuntimeContext.PathSaveFileMp3, GetContentChapter);
                 }
                 catch (Exception ex)
                 {
@@ -97,7 +96,6 @@ namespace CrawlDataService.Service
             while (isTrue)
             {
                 logger.Info($"Start get chapter of novel name:{novelName}, start:{startChapter}, size: {size}");
-                
                 //create sign value and path index.
                 var sign = (signKey + startChapter.ToString() + size.ToString()).FuzzySign(numberFuzzy).SignFunc();
                 var linkIndexChapter = $"{pathIndex}{idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
@@ -112,27 +110,27 @@ namespace CrawlDataService.Service
                     var listTagLi = htmlDoc.GetListHtmlNode("li", "class", "chapter-name");
                     var listTagA = listTagLi?.GetListHtmlNode("a", "class", "truncate");
                     var getHrefValue = listTagA?.Select(e => e.Attributes["href"].Value).ToList();
-                    
+
                     //get index last chapter
-                    if(lastChapter == 0)
+                    if (lastChapter == 0)
                     {
                         var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
                         var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
-                        effectNodes?.AddRange(pageNode?.GetListHtmlNode("li","class", " waves-effect "));
+                        effectNodes?.AddRange(pageNode?.GetListHtmlNode("li", "class", " waves-effect "));
                         var numberPathOfEffects = effectNodes?.Select(e => e.GetHtmlNode("a", "data-action", "loadBookIndex")?.Attributes["data-start"].Value).ToList();
                         var lastPage = numberPathOfEffects?.Where(e => !string.IsNullOrEmpty(e)).Select(e => int.Parse(e)).ToList().Max();
-                        if(lastPage != null)
+                        if (lastPage != null)
                             lastChapter = lastPage.Value;
                     }
                     allChapterPath.AddRange(getHrefValue);
-                    logger.Info($"End get chapter of novel id:{idNovel}, start:{startChapter}, size: {size}");
+                    logger.Info($"End get chapter of novel id:{novelName}, start:{startChapter}, size: {size}");
                 }
                 catch (Exception ex)
                 {
                     logger.Error($"Error while get path chapter of novel {novelName}");
                 }
-                
-                if(string.IsNullOrEmpty(html) || startChapter == lastChapter)
+
+                if (string.IsNullOrEmpty(html) || startChapter == lastChapter)
                 {
                     isTrue = false;
                     logger.Info($"End get chapter of novel id:{idNovel}");
@@ -145,7 +143,7 @@ namespace CrawlDataService.Service
             return allChapterPath;
         }
 
-        public async Task GetDataNovel(string pathNovel, string pathSave)
+        public async Task GetDataNovel(string pathNovel, string pathSave, string pathSaveVoice)
         {
             if (string.IsNullOrEmpty(pathNovel)) return;
             try
@@ -193,8 +191,9 @@ namespace CrawlDataService.Service
                 var hrefValue = tagA?.FirstOrDefault(e => e.InnerText.Equals("Đọc"))?.Attributes["href"].Value;
 
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
 
-                allChapter.SingleForEach(RuntimeContext.numberBatch, nameNovel, pathFolder, GetContentChapter);
+                allChapter.SingleForEach(RuntimeContext.numberBatch, nameNovel, pathFolder, pathFolderVoice, GetContentChapter);
 
                 var novel = new Novel
                 {
@@ -217,8 +216,9 @@ namespace CrawlDataService.Service
             }
         }
 
-        public async Task GetContentChapter(string nameNovel, int chaper, string pathSave, string? pathChapter)
+        public async Task GetContentChapter(string nameNovel, int chaper, string pathSave, string? pathChapter, string pathFolderVoice)
         {
+
             if (string.IsNullOrEmpty(pathChapter)) return;
             pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
             //if (chaper % 50 == 0) Thread.Sleep(25000);
@@ -240,6 +240,11 @@ namespace CrawlDataService.Service
                 var contentNodes = contentDoc?.GetHtmlNode("div", "id", "bookContentBody");
                 var content = GetContentFromHTML(contentNodes);
                 WriteFile.WriteFileTxt(pathSave, titleChapter.RemoveDiacriticsAndSpaces(), content);
+                if (RuntimeContext.IsChangeTextIntoVoice)
+                {
+                    var changeTextToVoiceSerivce = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
+                    await changeTextToVoiceSerivce.RequestCreateSpeechGoogleCloudy(content, pathFolderVoice, titleChapter.RemoveDiacriticsAndSpaces(), chaper);
+                }
                 return;
             }
             catch (Exception ex)

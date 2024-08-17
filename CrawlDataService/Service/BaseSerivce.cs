@@ -1,6 +1,5 @@
 ﻿using Common.ErrorNovel;
 using Migration.Common;
-using Repository.Model;
 
 namespace CrawlDataService.Service
 {

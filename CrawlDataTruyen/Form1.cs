@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.ErrorNovel;
+using CrawlDataService;
 using CrawlDataService.Service;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,25 +13,42 @@ namespace CrawlDataTruyen
         {
             InitializeComponent();
             txtLinkCrawl.Text = "/tim-kiem?status=5794f03dd7ced228f4419191&qs=1&m=8&q=&start=20&so=1&y=2024&vo=1";
+            txtThreadNumber.Text = RuntimeContext.MaxThraed.ToString();
+            cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtLinkCrawl.Text)) return;
-            if (string.IsNullOrEmpty(txtFolderPath.Text)) return;
+            if (string.IsNullOrEmpty(txtLinkCrawl.Text) || string.IsNullOrEmpty(txtFolderPath.Text))
+            {
+                MessageBox.Show("Please fill all info in Crawl Data.");
+                return;
+            }
+            if (cbChangeTextIntoVoice.Checked == true)
+            {
+                if (string.IsNullOrEmpty(txtPathFolderVoice.Text)) 
+                {
+                    MessageBox.Show("Please fill all info in Create Voice File.");
+                    return;
+                }
+            }
+
             if (int.TryParse(txtThreadNumber.Text, out var threadNUmber))
             {
                 RuntimeContext.MaxThraed = threadNUmber;
             }
             RuntimeContext.PathSaveLocal = txtFolderPath.Text;
 
+            RuntimeContext.IsChangeTextIntoVoice = cbChangeTextIntoVoice.Checked;
+            RuntimeContext.PathSaveFileMp3 = txtPathFolderVoice.Text;
+
             var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<GetDataFromWebService>();
+            var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
             Task.Run(async () =>
             {
-                await getDataFromWebService.StartCrawlData(1, txtFolderPath.Text, txtLinkCrawl.Text);
+                await getDataFromWebService.StartCrawlData(1, txtFolderPath.Text, txtPathFolderVoice.Text, txtLinkCrawl.Text);
             });
         }
-
 
         private void txtThreadNumber_TextChanged(object sender, EventArgs e)
         {
@@ -62,16 +80,30 @@ namespace CrawlDataTruyen
 
             if (string.IsNullOrEmpty(txtLinkCrawl.Text)) return;
             if (string.IsNullOrEmpty(txtFolderPath.Text)) return;
+            if (string.IsNullOrEmpty(txtPathFolderVoice.Text)) return;
+
+            RuntimeContext.IsChangeTextIntoVoice = cbChangeTextIntoVoice.Checked;
+            RuntimeContext.PathSaveFileMp3 = txtPathFolderVoice.Text;
+
             if (int.TryParse(txtThreadNumber.Text, out var threadNUmber))
             {
                 RuntimeContext.MaxThraed = threadNUmber;
             }
 
             var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<GetDataFromWebService>();
+            var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
             Task.Run(async () =>
             {
-                await getDataFromWebService.StartReCrawData(RuntimeContext.numberBatch, errorNovel, errorChaper, txtFolderPath.Text);
+                await getDataFromWebService.StartReCrawData(RuntimeContext.numberBatch, errorNovel, errorChaper, txtFolderPath.Text, txtPathFolderVoice.Text);
             });
+        }
+
+        private void txtChoiceFolderVoice_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                txtPathFolderVoice.Text = folderBrowserDialog1.SelectedPath;
+            }
         }
     }
 }

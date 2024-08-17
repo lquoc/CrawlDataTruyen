@@ -38,11 +38,15 @@
             btnFolder = new Button();
             txtFolderPath = new TextBox();
             btnReCrawl = new Button();
+            cbChangeTextIntoVoice = new CheckBox();
+            label5 = new Label();
+            txtPathFolderVoice = new TextBox();
+            btnChoiceFolderVoice = new Button();
             SuspendLayout();
             // 
             // btn_Start
             // 
-            btn_Start.Location = new Point(43, 230);
+            btn_Start.Location = new Point(466, 240);
             btn_Start.Name = "btn_Start";
             btn_Start.Size = new Size(94, 29);
             btn_Start.TabIndex = 0;
@@ -54,7 +58,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(41, 68);
+            label1.Location = new Point(24, 68);
             label1.Name = "label1";
             label1.Size = new Size(72, 20);
             label1.TabIndex = 1;
@@ -62,7 +66,7 @@
             // 
             // txtLinkCrawl
             // 
-            txtLinkCrawl.Location = new Point(150, 61);
+            txtLinkCrawl.Location = new Point(109, 63);
             txtLinkCrawl.Name = "txtLinkCrawl";
             txtLinkCrawl.PlaceholderText = "Link Crawl";
             txtLinkCrawl.Size = new Size(293, 27);
@@ -71,7 +75,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(41, 129);
+            label2.Location = new Point(24, 129);
             label2.Name = "label2";
             label2.Size = new Size(55, 20);
             label2.TabIndex = 3;
@@ -79,7 +83,7 @@
             // 
             // txtThreadNumber
             // 
-            txtThreadNumber.Location = new Point(150, 122);
+            txtThreadNumber.Location = new Point(109, 124);
             txtThreadNumber.Name = "txtThreadNumber";
             txtThreadNumber.PlaceholderText = "Số luồng";
             txtThreadNumber.Size = new Size(125, 27);
@@ -93,7 +97,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(41, 180);
+            label3.Location = new Point(24, 180);
             label3.Name = "label3";
             label3.Size = new Size(72, 20);
             label3.TabIndex = 5;
@@ -101,7 +105,7 @@
             // 
             // btnFolder
             // 
-            btnFolder.Location = new Point(449, 169);
+            btnFolder.Location = new Point(408, 171);
             btnFolder.Name = "btnFolder";
             btnFolder.Size = new Size(128, 29);
             btnFolder.TabIndex = 6;
@@ -111,7 +115,7 @@
             // 
             // txtFolderPath
             // 
-            txtFolderPath.Location = new Point(150, 171);
+            txtFolderPath.Location = new Point(109, 173);
             txtFolderPath.Name = "txtFolderPath";
             txtFolderPath.PlaceholderText = "Path Folder";
             txtFolderPath.Size = new Size(293, 27);
@@ -119,7 +123,7 @@
             // 
             // btnReCrawl
             // 
-            btnReCrawl.Location = new Point(165, 230);
+            btnReCrawl.Location = new Point(588, 240);
             btnReCrawl.Name = "btnReCrawl";
             btnReCrawl.Size = new Size(94, 29);
             btnReCrawl.TabIndex = 8;
@@ -127,11 +131,52 @@
             btnReCrawl.UseVisualStyleBackColor = true;
             btnReCrawl.Click += btnReCrawl_Click;
             // 
+            // cbChangeTextIntoVoice
+            // 
+            cbChangeTextIntoVoice.AutoSize = true;
+            cbChangeTextIntoVoice.Location = new Point(588, 68);
+            cbChangeTextIntoVoice.Name = "cbChangeTextIntoVoice";
+            cbChangeTextIntoVoice.Size = new Size(251, 24);
+            cbChangeTextIntoVoice.TabIndex = 9;
+            cbChangeTextIntoVoice.Text = "Chuyển Văn Bản Thành Âm Thanh";
+            cbChangeTextIntoVoice.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(588, 180);
+            label5.Name = "label5";
+            label5.Size = new Size(72, 20);
+            label5.TabIndex = 12;
+            label5.Text = "Save Path";
+            // 
+            // txtPathFolderVoice
+            // 
+            txtPathFolderVoice.Location = new Point(669, 173);
+            txtPathFolderVoice.Name = "txtPathFolderVoice";
+            txtPathFolderVoice.PlaceholderText = "Path Folder";
+            txtPathFolderVoice.Size = new Size(276, 27);
+            txtPathFolderVoice.TabIndex = 13;
+            // 
+            // btnChoiceFolderVoice
+            // 
+            btnChoiceFolderVoice.Location = new Point(951, 171);
+            btnChoiceFolderVoice.Name = "btnChoiceFolderVoice";
+            btnChoiceFolderVoice.Size = new Size(116, 29);
+            btnChoiceFolderVoice.TabIndex = 14;
+            btnChoiceFolderVoice.Text = "Choice Folder";
+            btnChoiceFolderVoice.UseVisualStyleBackColor = true;
+            btnChoiceFolderVoice.Click += txtChoiceFolderVoice_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1123, 487);
+            ClientSize = new Size(1123, 343);
+            Controls.Add(btnChoiceFolderVoice);
+            Controls.Add(txtPathFolderVoice);
+            Controls.Add(label5);
+            Controls.Add(cbChangeTextIntoVoice);
             Controls.Add(btnReCrawl);
             Controls.Add(txtFolderPath);
             Controls.Add(btnFolder);
@@ -159,5 +204,9 @@
         private Button btnFolder;
         private TextBox txtFolderPath;
         private Button btnReCrawl;
+        private CheckBox cbChangeTextIntoVoice;
+        private Label label5;
+        private TextBox txtPathFolderVoice;
+        private Button btnChoiceFolderVoice;
     }
 }
