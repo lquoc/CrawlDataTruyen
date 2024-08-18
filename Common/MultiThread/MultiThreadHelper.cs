@@ -4,7 +4,7 @@ namespace Common.MultiThread
 {
     public static class MultiThreadHelper
     {
-        public static void MultiThread(this List<string>? data, int numberBatch, string pathSave, string pathSaveVoice, Func<string, string, string,Task> action)
+        public static void MultiThread(this List<string>? data, int numberBatch, string pathSave, string pathSaveVoice, Func<string, string, string, Task> action)
         {
             if (data is null || data.Count() == 0) return;
             var currentTaskCount = data.Count / numberBatch + (data.Count % numberBatch > 0 ? 1 : 0);
@@ -24,7 +24,7 @@ namespace Common.MultiThread
             Task.WaitAll(tasks.ToArray());
         }
 
-        public static void MultiThread(this List<ChapterErrorLog>? data, int numberBatch, string pathSaveVoice, Func<string, int, string, string, string,Task> action)
+        public static void MultiThread(this List<ChapterErrorLog>? data, int numberBatch, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
         {
             if (data is null || data.Count() == 0) return;
             var currentTaskCount = data.Count / numberBatch + (data.Count % numberBatch > 0 ? 1 : 0);
@@ -44,7 +44,7 @@ namespace Common.MultiThread
             Task.WaitAll(tasks.ToArray());
         }
 
-        public static void MultiThreadParralle(this List<string>? listPathChapter,int numberBatch,string novelName, string pathSave, string pathSaveVoice, Func<string, int, string, string, string,Task> action)
+        public static void MultiThreadParralle(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
         {
             if (listPathChapter?.Count == 0) return;
             var concurrentTaskCount = listPathChapter.Count / numberBatch + (listPathChapter.Count % numberBatch > 0 ? 1 : 0);
@@ -62,7 +62,7 @@ namespace Common.MultiThread
             });
         }
 
-        public static void SingleForEach(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, string pathSaveVoice,Func<string, int, string, string, string, Task> action)
+        public static void SingleForEach(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
         {
             if (listPathChapter?.Count == 0) return;
             int tamp = 1;

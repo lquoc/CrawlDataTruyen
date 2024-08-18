@@ -54,7 +54,7 @@ namespace Common
                 string messageContent = messageMatch.Groups[1].Value;
                 var chapterErrorLog = new ChapterErrorLog();
 
-                var pairs = messageContent.Split(new[] { Constant.Seperation+" " }, StringSplitOptions.None);
+                var pairs = messageContent.Split(new[] { Constant.Seperation + " " }, StringSplitOptions.None);
 
                 foreach (var pair in pairs)
                 {

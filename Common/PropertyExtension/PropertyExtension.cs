@@ -3,29 +3,52 @@ using HtmlAgilityPack;
 using Jint;
 using System.Globalization;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 namespace Common
 {
     public static class PropertyExtension
     {
+        static HashSet<string> IsFullString = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Hoàn Thành"
+        };
         public static string JoinGender(this IEnumerable<string>? genders)
         {
             if (genders == null || genders.Count() == 0) return string.Empty;
             return string.Join(Constant.Seperation, genders);
         }
+        public static bool GetStatus(this string? status)
+        {
+            if (string.IsNullOrEmpty(status)) return false;
+            if (IsFullString.Contains(status))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        //support html 
         public static HtmlNode? GetHtmlNode(this HtmlDocument htmlDoc, string tagName)
         {
             return htmlDoc.DocumentNode.Descendants(tagName).FirstOrDefault();
         }
+        public static HtmlNode? GetHtmlNode(this HtmlNode htmlDoc, string tagName)
+        {
+            return htmlDoc.Descendants(tagName).FirstOrDefault();
+        }
+        public static List<HtmlNode>? GetListHtmlNode(this HtmlNode htmlDoc, string tagName)
+        {
+            return htmlDoc.Descendants(tagName).ToList();
+        }
         public static HtmlNode? GetHtmlNode(this HtmlDocument htmlDoc, string tagName, string attributeName, string attributeValue)
         {
-            return htmlDoc.DocumentNode.Descendants(tagName).FirstOrDefault(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Equals(attributeValue));
+            return htmlDoc.DocumentNode.Descendants(tagName).FirstOrDefault(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue));
         }
         public static HtmlNode? GetHtmlNode(this HtmlNode htmlNote, string tagName, string attributeName, string attributeValue)
         {
-            return htmlNote.Descendants(tagName).FirstOrDefault(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Equals(attributeValue));
+            return htmlNote.Descendants(tagName).FirstOrDefault(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue));
         }
 
 
@@ -36,15 +59,15 @@ namespace Common
 
         public static List<HtmlNode>? GetListHtmlNode(this HtmlDocument htmlDoc, string tagName, string attributeName, string attributeValue)
         {
-            return htmlDoc.DocumentNode.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Equals(attributeValue)).ToList();
+            return htmlDoc.DocumentNode.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue)).ToList();
         }
         public static List<HtmlNode>? GetListHtmlNode(this HtmlNode htmlNote, string tagName, string attributeName, string attributeValue)
         {
-            return htmlNote.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Equals(attributeValue)).ToList();
+            return htmlNote.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue)).ToList();
         }
         public static List<HtmlNode>? GetListHtmlNode(this List<HtmlNode> htmlNote, string tagName, string attributeName, string attributeValue)
         {
-            return htmlNote.SelectMany(e => e.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Equals(attributeValue))).ToList();
+            return htmlNote.SelectMany(e => e.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue))).ToList();
         }
 
         public static string RemoveDiacriticsAndSpaces(this string? name)
@@ -103,17 +126,24 @@ namespace Common
         public static string DownloadStringWebClient(this string path)
         {
             var html = "";
+            int i = 0;
             do
             {
                 try
                 {
                     Thread.Sleep(1000);
+                    i++;
+                    if (i == 10)
+                    {
+                        RuntimeContext.logger.Error($"Cannot found paht: {path}");
+                        break;
+                    }
                     WebClient webClient = new WebClient();
                     html = webClient.CreateWebClient().DownloadString(path);
                 }
                 catch (Exception ex)
                 {
-                    RuntimeContext.logger.Warn($"Sleep 5s, msg: {ex.Message}");
+                    RuntimeContext.logger.Warn($"Sleep {2 * RuntimeContext.MaxThread}s, msg: {ex.Message}");
                     Thread.Sleep(2000 * RuntimeContext.MaxThread);
                 }
             } while (string.IsNullOrEmpty(html));

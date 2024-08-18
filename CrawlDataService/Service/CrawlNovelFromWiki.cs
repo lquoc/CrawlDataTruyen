@@ -30,12 +30,15 @@ namespace CrawlDataService.Service
                 var html = pathSearch.DownloadStringWebClient();
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
+                //get href novels of page
                 var bookListNode = htmlDoc.GetListHtmlNode("div", "class", "book-list");
                 var infoCol = bookListNode?.GetListHtmlNode("div", "class", "info-col");
                 var pathHrefs = infoCol?.GetListHtmlNode("a", "class", "tooltipped");
                 var pathNovels = pathHrefs?.Select(e => e.Attributes["href"].Value).ToList();
                 if (pathNovels is null || pathNovels.Count == 0) return;
                 listPathNovel.AddRange(pathNovels);
+                
+                //get href next page
                 var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
                 var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
                 var hrefLink = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-right").Any()).Select(e => e.Descendants("a").FirstOrDefault().Attributes["href"].Value).FirstOrDefault();
@@ -237,9 +240,9 @@ namespace CrawlDataService.Service
                 logger.Info($"Start crawl novel:{nameNovel}, chapter: {chaper}");
                 HtmlDocument htmlDoc = new HtmlDocument();
                 var html = pathChapter.DownloadStringWebClient();
+                htmlDoc.LoadHtml(html);
 
                 //get title of chapter
-                htmlDoc.LoadHtml(html);
                 titleChapters = htmlDoc.DocumentNode.Descendants("title").FirstOrDefault()?.InnerText.Split("-");
                 titleChapter = titleChapters?.Count() > 1 ? titleChapters[1] : titleChapters?.Count() > 0 ? titleChapters[0] : $"Chuong {chaper}";
 
@@ -247,7 +250,7 @@ namespace CrawlDataService.Service
                 var contentDoc = htmlDoc.GetHtmlNode("div", "class", "content-body-wrapper");
                 var contentNodes = contentDoc?.GetHtmlNode("div", "id", "bookContentBody");
                 var content = GetContentFromHTML(contentNodes);
-                WriteFile.WriteFileTxt(pathSave, titleChapter.RemoveDiacriticsAndSpaces(), content);
+                WriteFile.WriteFileTxt(pathSave.Trim(), titleChapter.RemoveDiacriticsAndSpaces(), content);
                 if (RuntimeContext.IsChangeTextIntoVoice)
                 {
                     var changeTextToVoiceSerivce = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();

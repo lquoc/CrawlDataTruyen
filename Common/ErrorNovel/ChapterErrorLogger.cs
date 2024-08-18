@@ -1,5 +1,4 @@
-﻿using Migration.Common;
-using NLog;
+﻿using NLog;
 using NLog.Config;
 using System.Globalization;
 

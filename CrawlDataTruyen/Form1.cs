@@ -14,7 +14,7 @@ namespace CrawlDataTruyen
         public Form1()
         {
             InitializeComponent();
-            txtLinkCrawl.Text = "/tim-kiem?status=5794f03dd7ced228f4419191&qs=1&m=8&q=&start=20&so=1&y=2024&vo=1";
+            txtLinkCrawl.Text = "https://dtruyen.com/truyen-ngon-tinh-hay/";
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
             StartCreateComboxBox();

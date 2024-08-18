@@ -10,11 +10,11 @@ namespace Repository.Model
         public string Description { get; set; }
         public string ImgPath { get; set; }
         public string Path { get; set; }
-
+        public bool IsFull { get; set; } = false;
 
         public string GetString()
         {
-            return $"{Name}|{Genre}|{NumberChapter}|{Author}|{Description}|{ImgPath}|{Path}";
+            return $"{Name}|{Genre}|{IsFull}|{NumberChapter}|{Author}|{Description}|{ImgPath}|{Path}";
         }
 
     }
