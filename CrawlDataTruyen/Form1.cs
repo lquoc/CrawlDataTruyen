@@ -1,6 +1,8 @@
 ﻿using Common;
 using Common.ErrorNovel;
+using Common.FakeProxy;
 using CrawlDataService;
+using CrawlDataService.Common;
 using CrawlDataService.Service;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Enum;
@@ -14,9 +16,13 @@ namespace CrawlDataTruyen
         public Form1()
         {
             InitializeComponent();
-            txtLinkCrawl.Text = "https://dtruyen.com/truyen-ngon-tinh-hay/";
+            txtLinkCrawl.Text = "https://truyenwikidich.net/truyen/xuyen-nhanh-o-cac-the-gioi-duong-ca-man--Yqq_sFS4CAeRjj2b";
+            
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
+            radibtnMp3.Checked = RuntimeContext.TypeFile == TypeFile.MP3;
+            radioMultiNovel.Checked = RuntimeContext.TypeCrawl == TypeCrawl.MultiNovel;
+            txtKeyAPIProxy.Enabled = false;
             StartCreateComboxBox();
         }
         void StartCreateComboxBox()
@@ -29,6 +35,9 @@ namespace CrawlDataTruyen
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            var test = FakeProxy.GetProxyInfo();
+
+
             if (string.IsNullOrEmpty(RuntimeContext.PathCrawl) || string.IsNullOrEmpty(RuntimeContext.PathSaveLocal))
             {
                 MessageBox.Show("Please fill all info in Crawl Data.");
@@ -42,20 +51,19 @@ namespace CrawlDataTruyen
                     return;
                 }
             }
-            CrawlNovelSerivce crawlNovelService;
-            if(RuntimeContext.EnumPage == EnumPage.WikiDich)
-            {
-                crawlNovelService = RuntimeContext._serviceProvider.GetRequiredService<CrawlNovelFromWiki>();
-            }
-            else
-            {
-                crawlNovelService = RuntimeContext._serviceProvider.GetRequiredService<CrawlNovelFromDTruyen>();
-            }
-            var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
+
+            RuntimeContext.IsStart = true;
+
+            groupCrawlDataInfo.Enabled = false;
+            groupChangeText.Enabled = false;
+            btn_Start.Enabled = false;
+
+            var managerService = RuntimeContext._serviceProvider.GetRequiredService<ManagerService>();
             Task.Run(async () =>
             {
-                await crawlNovelService.StartCrawlData(1, RuntimeContext.PathSaveLocal, RuntimeContext.PathSaveFileMp3, RuntimeContext.PathCrawl);
+                await managerService.StartService();
             });
+
         }
 
         private void txtThreadNumber_TextChanged(object sender, EventArgs e)
@@ -66,7 +74,10 @@ namespace CrawlDataTruyen
                 txtThreadNumber.Text = txtThreadNumber.Text.Remove(txtThreadNumber.Text.Length - 1);
                 return;
             }
-            RuntimeContext.MaxThread = int.Parse(txtThreadNumber.Text);
+            if (!string.IsNullOrEmpty(txtThreadNumber.Text))
+            {
+                RuntimeContext.MaxThread = int.Parse(txtThreadNumber.Text);
+            }
         }
 
         private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
@@ -82,31 +93,31 @@ namespace CrawlDataTruyen
             }
         }
 
-        private void btnReCrawl_Click(object sender, EventArgs e)
-        {
-            var infoLog = ReadFile.ReadFileLog(RuntimeContext.PathChapterError);
-            var errorNovel = infoLog.Where(e => e.IsNovelError == true).ToList();
-            var errorChaper = infoLog.Where(e => e.IsNovelError == false).ToList();
+        //private void btnReCrawl_Click(object sender, EventArgs e)
+        //{
+        //    var infoLog = ReadFile.ReadFileLog(RuntimeContext.PathChapterError);
+        //    var errorNovel = infoLog.Where(e => e.IsNovelError == true).ToList();
+        //    var errorChaper = infoLog.Where(e => e.IsNovelError == false).ToList();
 
-            if (string.IsNullOrEmpty(txtLinkCrawl.Text)) return;
-            if (string.IsNullOrEmpty(txtFolderPath.Text)) return;
-            if (string.IsNullOrEmpty(txtPathFolderVoice.Text)) return;
+        //    if (string.IsNullOrEmpty(txtLinkCrawl.Text)) return;
+        //    if (string.IsNullOrEmpty(txtFolderPath.Text)) return;
+        //    if (string.IsNullOrEmpty(txtPathFolderVoice.Text)) return;
 
-            RuntimeContext.IsChangeTextIntoVoice = cbChangeTextIntoVoice.Checked;
-            RuntimeContext.PathSaveFileMp3 = txtPathFolderVoice.Text;
+        //    RuntimeContext.IsChangeTextIntoVoice = cbChangeTextIntoVoice.Checked;
+        //    RuntimeContext.PathSaveFileMp3 = txtPathFolderVoice.Text;
 
-            if (int.TryParse(txtThreadNumber.Text, out var threadNUmber))
-            {
-                RuntimeContext.MaxThread = threadNUmber;
-            }
+        //    if (int.TryParse(txtThreadNumber.Text, out var threadNUmber))
+        //    {
+        //        RuntimeContext.MaxThread = threadNUmber;
+        //    }
 
-            var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<CrawlNovelFromWiki>();
-            var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
-            Task.Run(async () =>
-            {
-                await getDataFromWebService.StartReCrawData(RuntimeContext.numberBatch, errorNovel, errorChaper, txtFolderPath.Text, txtPathFolderVoice.Text);
-            });
-        }
+        //    var getDataFromWebService = RuntimeContext._serviceProvider.GetRequiredService<CrawlNovelFromWiki>();
+        //    var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
+        //    Task.Run(async () =>
+        //    {
+        //        await getDataFromWebService.StartReCrawData(RuntimeContext.numberBatch, errorNovel, errorChaper, txtFolderPath.Text, txtPathFolderVoice.Text);
+        //    });
+        //}
 
         private void txtChoiceFolderVoice_Click(object sender, EventArgs e)
         {
@@ -139,6 +150,45 @@ namespace CrawlDataTruyen
         private void cboCrawlFromPage_SelectedIndexChanged(object sender, EventArgs e)
         {
             RuntimeContext.EnumPage = (EnumPage)cboCrawlFromPage.SelectedIndex;
+        }
+
+        private void radibtnMp3_CheckedChanged(object sender, EventArgs e)
+        {
+            RuntimeContext.TypeFile = TypeFile.MP3;
+        }
+
+        private void radiobtnMP4_CheckedChanged(object sender, EventArgs e)
+        {
+            RuntimeContext.TypeFile = TypeFile.MP4;
+        }
+
+        private void radiobtnOneNovel_CheckedChanged(object sender, EventArgs e)
+        {
+            RuntimeContext.TypeCrawl = TypeCrawl.OneNovel;
+        }
+
+        private void NhiềuMultiNovel_CheckedChanged(object sender, EventArgs e)
+        {
+            RuntimeContext.TypeCrawl = TypeCrawl.MultiNovel;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            RuntimeContext.IsStart = false;
+            groupCrawlDataInfo.Enabled = true;
+            groupChangeText.Enabled = true;
+            btn_Start.Enabled = true;
+        }
+
+        private void cbChangeProxy_CheckedChanged(object sender, EventArgs e)
+        {
+            txtKeyAPIProxy.Enabled = cbChangeProxy.Checked;
+            RuntimeContext.IsChangeProxy = true;
+        }
+
+        private void txtKeyAPIProxy_TextChanged(object sender, EventArgs e)
+        {
+            RuntimeContext.ProxyKey = txtKeyAPIProxy.Text;
         }
     }
 }

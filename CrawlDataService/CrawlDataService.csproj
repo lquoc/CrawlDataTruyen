@@ -10,19 +10,21 @@
     <PackageReference Include="AWSSDK.Polly" Version="4.0.0-preview" />
     <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.6.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.0" />
+    <PackageReference Include="Kayisoft.Abp.XabeFFmpeg" Version="3.5.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
     <PackageReference Include="RestSharp" Version="111.4.0" />
     <PackageReference Include="Selenium.Support" Version="4.0.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.18.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="122.0.6261.3900-beta" />
     <PackageReference Include="Selenium.WebDriver.MicrosoftWebDriver" Version="10.0.17134" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <PackageReference Include="Xabe.FFmpeg" Version="5.2.6" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
   </ItemGroup>
 </Project>

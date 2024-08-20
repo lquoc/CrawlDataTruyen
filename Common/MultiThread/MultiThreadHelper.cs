@@ -16,7 +16,8 @@ namespace Common.MultiThread
                 {
                     foreach (var item in batch)
                     {
-                        action(item, pathSave, pathSaveVoice);
+                        if (RuntimeContext.IsStart)
+                            action(item, pathSave, pathSaveVoice);
                     }
                 });
                 tasks.Add(task);
@@ -24,19 +25,21 @@ namespace Common.MultiThread
             Task.WaitAll(tasks.ToArray());
         }
 
-        public static void MultiThread(this List<ChapterErrorLog>? data, int numberBatch, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
+        public static void MultiThread(this List<string>? data, int numberBatch, Novel novel, Func<int, string, Novel, Task> action)
         {
             if (data is null || data.Count() == 0) return;
             var currentTaskCount = data.Count / numberBatch + (data.Count % numberBatch > 0 ? 1 : 0);
             var batchNumber = currentTaskCount > RuntimeContext.MaxThread ? (data.Count / RuntimeContext.MaxThread + (data.Count % RuntimeContext.MaxThread > 0 ? 1 : 0)) : numberBatch;
             var tasks = new List<Task>();
+            int tamp = 1;
             foreach (var batch in data.Chunk(batchNumber))
             {
                 var task = Task.Factory.StartNew(() =>
                 {
                     foreach (var item in batch)
                     {
-                        action(item.NovelName, item.ChapterNumber, item.PathChapterLocal, item.PathChapter, pathSaveVoice);
+                        if (RuntimeContext.IsStart)
+                            action(tamp++, item, novel); ;
                     }
                 });
                 tasks.Add(task);
@@ -44,7 +47,7 @@ namespace Common.MultiThread
             Task.WaitAll(tasks.ToArray());
         }
 
-        public static void MultiThreadParralle(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
+        public static void MultiThreadParralle(this List<string>? listPathChapter, int numberBatch, Novel novel, Func<int, string, Novel, Task> action)
         {
             if (listPathChapter?.Count == 0) return;
             var concurrentTaskCount = listPathChapter.Count / numberBatch + (listPathChapter.Count % numberBatch > 0 ? 1 : 0);
@@ -55,20 +58,22 @@ namespace Common.MultiThread
                     MaxDegreeOfParallelism = concurrentTaskCount,
                 };
                 int tamp = 1;
-                Parallel.ForEach(listPathChapter, option, e =>
+                Parallel.ForEach(listPathChapter, option, pathChapter =>
                 {
-                    action(novelName, tamp++, pathSave, e, pathSaveVoice);
+                    if (RuntimeContext.IsStart)
+                        action(tamp++, pathChapter, novel);
                 });
             });
         }
 
-        public static void SingleForEach(this List<string>? listPathChapter, int numberBatch, string novelName, string pathSave, string pathSaveVoice, Func<string, int, string, string, string, Task> action)
+        public static void SingleForEach(this List<string>? listPathChapter, Novel novel, Func<int, string, Novel, Task> action)
         {
             if (listPathChapter?.Count == 0) return;
             int tamp = 1;
-            listPathChapter?.ForEach(e =>
+            listPathChapter?.ForEach(pathChapter =>
             {
-                action(novelName, tamp++, pathSave, e, pathSaveVoice);
+                if (RuntimeContext.IsStart)
+                    action(tamp++, pathChapter, novel);
             });
         }
 

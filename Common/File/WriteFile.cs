@@ -52,7 +52,7 @@ namespace Common
                     arrayData.Add(novel.NumberChapter);
                     arrayData.Add(novel.Author);
                     arrayData.Add(novel.Description);
-                    arrayData.Add(novel.Path);
+                    arrayData.Add(novel.PathLocal);
                     workSheet.Cells.ImportArrayList(arrayData, i, 0, false);
                     i++;
                 }

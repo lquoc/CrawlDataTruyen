@@ -47,6 +47,48 @@ namespace CrawlDataService
                 RuntimeContext.logger.Error($"Error while create file mp3, msg :{ex}");
             }
         }
+        public async Task<List<byte[]>?> RequestChangeTextToSpeech(string longText = "")
+        {
+            try
+            {
+                var parts = SplitTextByBytes(longText, 5000);
+                var client = new TextToSpeechClientBuilder
+                {
+                    CredentialsPath = Path.Combine(AppContext.BaseDirectory, "KeyAPIGGCloud", "soy-extension-432808-v1-3442f5169050.json")
+                }.Build();
+
+                List<byte[]> audioParts = new List<byte[]>();
+
+                foreach (var part in parts)
+                {
+                    SynthesisInput input = new SynthesisInput
+                    {
+                        Text = part
+                    };
+
+                    VoiceSelectionParams voice = new VoiceSelectionParams
+                    {
+                        LanguageCode = "vi-VN",
+                        SsmlGender = SsmlVoiceGender.Female
+                    };
+
+                    AudioConfig config = new AudioConfig
+                    {
+                        AudioEncoding = AudioEncoding.Mp3
+                    };
+
+                    var response = client.SynthesizeSpeech(input, voice, config);
+                    audioParts.Add(response.AudioContent.ToByteArray());
+                }
+                return audioParts;
+            }
+            catch (Exception ex)
+            {
+                RuntimeContext.logger.Error($"Error while create file mp3, msg :{ex}");
+            }
+            return null;
+        }
+
         public async Task RequestCreateSpeechGoogleCloudy(string longText = "", string path = "", string nameFile = "", int indexChapter = 0)
         {
             try
@@ -96,6 +138,7 @@ namespace CrawlDataService
                 RuntimeContext.logger.Error($"Error while create file mp3, msg :{ex}");
             }
         }
+
         static List<string> SplitTextByBytes(string text, int maxBytes)
         {
             List<string> parts = new List<string>();

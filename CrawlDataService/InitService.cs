@@ -4,6 +4,7 @@ using Common;
 using CrawlDataService.Service;
 using Microsoft.Extensions.DependencyInjection;
 using Amazon.Runtime;
+using CrawlDataService.Common;
 
 namespace CrawlDataService
 {
@@ -29,7 +30,9 @@ namespace CrawlDataService
                 return new AmazonPollyClient(credentials, config);
             });
             service.AddScoped<ChangeTextToVoice>();
+            service.AddScoped<MP4Service>();
             service.AddScoped<CrawlNovelFromDTruyen>();
+            service.AddScoped<ManagerService>();
             return service;
         }
 

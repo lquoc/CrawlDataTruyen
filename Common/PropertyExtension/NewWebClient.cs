@@ -1,4 +1,6 @@
-﻿using OpenQA.Selenium;
+﻿using Common;
+using Common.FakeProxy;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
 using System.Net;
 using System.Text;
@@ -7,11 +9,14 @@ namespace CrawlDataService.Common
 {
     public static class NewWebClient
     {
-        public static WebClient CreateWebClient(this WebClient webClient)
+        public static WebClient CreateWebClient(this WebClient webClient, bool isChangeProxy = true)
         {
             webClient = new WebClient();
             AddHeaderForWebClient(webClient);
-            //ChangeProxy(webClient);
+            if (RuntimeContext.IsChangeProxy && isChangeProxy)
+            {
+                ChangeProxy(webClient);
+            }
             return webClient;
         }
 
@@ -33,17 +38,25 @@ namespace CrawlDataService.Common
 
         public static void ChangeProxy(WebClient webClient)
         {
-            WebProxy proxy = new WebProxy
+            try
             {
-                Address = new Uri("47.74.40.128:7788"),
-                BypassProxyOnLocal = false,
-
-                // Nếu proxy cần xác thực
-                //Credentials = new NetworkCredential(
-                //    userName: "yourUsername",
-                //    password: "yourPassword")
-            };
-            webClient.Proxy = proxy;
+                var (isSuccess,proxyInfo) = FakeProxy.GetProxyInfo();
+                if (isSuccess)
+                {
+                    WebProxy proxy = new WebProxy($"https://{proxyInfo.Data[0].Proxy}", true)
+                    {
+                        // Nếu proxy cần xác thực
+                        Credentials = new NetworkCredential(
+                            userName: proxyInfo.Data[0].User,
+                            password: proxyInfo.Data[0].KeyCode)
+                    };
+                    webClient.Proxy = proxy;
+                }
+            }
+            catch (Exception ex)
+            {
+                RuntimeContext.logger.Error($"Cannot change proxy, msg {ex}");
+            }
         }
 
         public static void AddHeaderForWebClient(WebClient webClient)
