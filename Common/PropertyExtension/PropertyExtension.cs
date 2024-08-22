@@ -1,9 +1,8 @@
 ﻿using CrawlDataService.Common;
 using HtmlAgilityPack;
 using Jint;
-using System.Drawing;
+using SixLabors.ImageSharp.Processing;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -171,11 +170,10 @@ namespace Common
             }
             return pathCombine;
         }
-        public static Image ResizeImageToEvenDimensions(this string inputPath)
+        public static SixLabors.ImageSharp.Image ResizeImageToEvenDimensions(this string inputPath)
         {
-            using (var image = Image.FromFile(inputPath))
+            using (var image = SixLabors.ImageSharp.Image.Load(inputPath))
             {
-                // Lấy kích thước hiện tại của ảnh
                 int width = image.Width;
                 int height = image.Height;
 
@@ -183,31 +181,25 @@ namespace Common
                 int newWidth = (width % 2 == 0) ? width : width + 1;
                 int newHeight = (height % 2 == 0) ? height : height + 1;
 
-                // Tạo một Bitmap mới với kích thước đã điều chỉnh
-                var resizedImage = new Bitmap(newWidth, newHeight);
-
-                using (var graphics = Graphics.FromImage(resizedImage))
-                {
-                    // Vẽ hình ảnh gốc vào hình ảnh mới với kích thước đã điều chỉnh
-                    graphics.DrawImage(image, 0, 0, newWidth, newHeight);
-                }
-                return resizedImage;
+                // Thay đổi kích thước hình ảnh
+                image.Mutate(ctx => ctx.Resize(newWidth, newHeight));
+                return image.Clone(ctx => ctx.Resize(newWidth, newHeight));
             }
         }
-        public static void ResizeImageToEvenDimensions(Image img, string outputPath)
-        {
-            using (var image = img)
-            {
-                int width = image.Width;
-                int height = image.Height;
-                int newWidth = (width % 2 == 0) ? width : width + 1;
-                int newHeight = (height % 2 == 0) ? height : height + 1;
-                using (var resizedImage = new Bitmap(image, newWidth, newHeight))
-                {
-                    resizedImage.Save(outputPath);
-                }
-            }
-        }
+        //public static void ResizeImageToEvenDimensions(Image img, string outputPath)
+        //{
+        //    using (var image = img)
+        //    {
+        //        int width = image.Width;
+        //        int height = image.Height;
+        //        int newWidth = (width % 2 == 0) ? width : width + 1;
+        //        int newHeight = (height % 2 == 0) ? height : height + 1;
+        //        using (var resizedImage = new Bitmap(image, newWidth, newHeight))
+        //        {
+        //            resizedImage.Save(outputPath);
+        //        }
+        //    }
+        //}
 
 
         public static string GetSignInKey(this HtmlDocument htmlDoc)

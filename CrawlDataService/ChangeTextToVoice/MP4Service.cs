@@ -1,11 +1,9 @@
 ﻿using Common;
 using Microsoft.Extensions.DependencyInjection;
-using Nito.AsyncEx;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Png;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using Xabe.FFmpeg;
 
 namespace CrawlDataService
 {
@@ -40,7 +38,7 @@ namespace CrawlDataService
                 // Tạo tệp tạm thời từ MemoryStream của hình ảnh]
                 Image image = imgNovel.ResizeImageToEvenDimensions();
                 string tempImagePath = Path.GetTempFileName() + ".png";
-                using (var imageStream = ImageToStream(image, ImageFormat.Png))
+                using (var imageStream = ImageToStream(image, new PngEncoder()))
                 using (var fileStream = new FileStream(tempImagePath, FileMode.Create, FileAccess.Write))
                 {
                     imageStream.CopyTo(fileStream);
@@ -76,7 +74,7 @@ namespace CrawlDataService
             }
             catch (Exception ex)
             {
-                RuntimeContext.logger.Error($"Error while create file mp4, chapter {indexChapter}");
+                RuntimeContext.logger.Error($"Error while create file mp4, chapter {indexChapter}, msg: {ex}");
             }
         }
 
@@ -131,12 +129,12 @@ namespace CrawlDataService
             }
             return null;
         }
-        public MemoryStream ImageToStream(Image image, ImageFormat format)
+        public MemoryStream ImageToStream(Image image, IImageEncoder encoder)
         {
             try
             {
                 var stream = new MemoryStream();
-                image.Save(stream, format);
+                image.Save(stream, encoder);
                 stream.Seek(0, SeekOrigin.Begin); // Đặt con trỏ đến đầu stream
                 return stream;
             }
