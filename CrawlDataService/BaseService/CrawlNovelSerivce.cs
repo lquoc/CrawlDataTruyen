@@ -17,7 +17,6 @@ namespace CrawlDataService.Service
         }
         public virtual async Task StartCrawlOnlyOneNovel(int numberBatch, string pathSave, string pathSaveVoice, string pathNovel)
         {
-
         }
 
     }

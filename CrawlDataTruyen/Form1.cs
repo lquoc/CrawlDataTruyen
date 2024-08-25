@@ -4,6 +4,7 @@ using Common.FakeProxy;
 using CrawlDataService;
 using CrawlDataService.Common;
 using CrawlDataService.Service;
+using CrawlDataTruyen.ConsoleSetup;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Enum;
 using static Repository.Enum.ListEnum;
@@ -16,7 +17,7 @@ namespace CrawlDataTruyen
         public Form1()
         {
             InitializeComponent();
-            txtLinkCrawl.Text = "https://truyenwikidich.net/truyen/xuyen-nhanh-o-cac-the-gioi-duong-ca-man--Yqq_sFS4CAeRjj2b";
+            txtLinkCrawl.Text = "https://dtruyen.com/thap-nien-70-tieu-tho-may-xinh-dep/";
             
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
@@ -24,7 +25,15 @@ namespace CrawlDataTruyen
             radioMultiNovel.Checked = RuntimeContext.TypeCrawl == TypeCrawl.MultiNovel;
             txtKeyAPIProxy.Enabled = false;
             StartCreateComboxBox();
+            InitRickTextBox();
         }
+        void InitRickTextBox()
+        {
+            var consoleOutput = new ConsoleOutput(rtbConsole);
+            Console.SetOut(consoleOutput);
+            rtbConsole.ReadOnly = true;
+        }
+
         void StartCreateComboxBox()
         {
             cboCrawlFromPage.Items.Add(ListEnum.EnumPage.WikiDich);
