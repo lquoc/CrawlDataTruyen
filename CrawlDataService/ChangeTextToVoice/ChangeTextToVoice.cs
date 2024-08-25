@@ -54,8 +54,10 @@ namespace CrawlDataService
                 var parts = SplitTextByBytes(longText, 5000);
                 var client = new TextToSpeechClientBuilder
                 {
-                    CredentialsPath = Path.Combine(AppContext.BaseDirectory, "KeyAPIGGCloud", "soy-extension-432808-v1-3442f5169050.json")
+                    CredentialsPath = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "KeyAPIGGCloud"), "*.json").FirstOrDefault()
                 }.Build();
+
+
 
                 List<byte[]> audioParts = new List<byte[]>();
 
