@@ -1,5 +1,7 @@
 ﻿using Common.ErrorNovel;
+using Microsoft.Extensions.Hosting;
 using Migration.Common;
+using Repository.Model;
 
 namespace CrawlDataService.Service
 {
@@ -11,13 +13,25 @@ namespace CrawlDataService.Service
         public virtual async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
         {
         }
-        public virtual async Task StartGetInfoNovelAndChapter(string pathNovel, string pathSave, string pathSaveVoice)
-        {
 
-        }
-        public virtual async Task StartCrawlOnlyOneNovel(int numberBatch, string pathSave, string pathSaveVoice, string pathNovel)
+        public virtual List<string>? GetLinksNovel(string path)
         {
+            return null;
         }
 
+        public virtual async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
+        {
+            return null;
+        }
+
+        public virtual List<string>? GetAllLinksChapter(string pathNovel)
+        {
+            return null;
+        }
+
+        public virtual async Task<ChapterInfo?> GetContentChapter(int chaper, Novel novel, string? pathChapter)
+        {
+            return null;
+        }
     }
 }

@@ -66,14 +66,14 @@ namespace Common.MultiThread
             });
         }
 
-        public static void SingleForEach(this List<string>? listPathChapter, Novel novel, Func<int, string, Novel, Task> action)
+        public static void SingleForEach(this List<string>? listPathChapter, string novelName, Func<int, string, string, string> action)
         {
             if (listPathChapter?.Count == 0) return;
             int tamp = 1;
             listPathChapter?.ForEach(pathChapter =>
             {
                 if (RuntimeContext.IsStart)
-                    action(tamp++, pathChapter, novel);
+                    action(tamp++, novelName, pathChapter);
             });
         }
 
