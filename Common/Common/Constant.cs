@@ -7,11 +7,11 @@
         {
             get
             {
-                switch (RuntimeContext.EnumPage)
+                switch (RuntimeContext.EnumWeb)
                 {
-                    case Repository.Enum.ListEnum.EnumPage.WikiDich:
+                    case Repository.Enum.ListEnum.EnumWeb.Wikidich:
                         return "https://truyenwikidich.net";
-                    case Repository.Enum.ListEnum.EnumPage.DTruyen:
+                    case Repository.Enum.ListEnum.EnumWeb.DTruyen:
                         return "https://dtruyen.com/";
                     default:
                         return "";

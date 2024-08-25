@@ -20,8 +20,7 @@ namespace CrawlDataService
         }
         private static void AddServiceCrawl(IServiceCollection services)
         {
-            var types = typeof(CrawlNovelFromWiki).Assembly.GetTypes().ToList();
-            var typesServiceCrawl = types.Where(e => e.IsSubclassOf(typeof(CrawlNovelSerivce)));
+            var typesServiceCrawl = GetTypesService();
             foreach (var type in typesServiceCrawl)
             {
                 services.AddScoped(type);
@@ -33,6 +32,12 @@ namespace CrawlDataService
             }
         }
 
+        public static List<Type> GetTypesService()
+        {
+            var types = typeof(CrawlNovelFromWikidich).Assembly.GetTypes().ToList();
+            var typesServiceCrawl = types.Where(e => e.IsSubclassOf(typeof(CrawlNovelSerivce)));
+            return typesServiceCrawl.ToList();
+        }
 
         private static IServiceCollection AddServiceCore(ServiceCollection service)
         {

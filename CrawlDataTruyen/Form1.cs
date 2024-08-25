@@ -1,10 +1,7 @@
 ﻿using Common;
-using Common.ErrorNovel;
 using Common.FakeProxy;
-using CrawlDataService;
 using CrawlDataService.Common;
-using CrawlDataService.Service;
-using CrawlDataTruyen.ConsoleSetup;
+using Microsoft.ClearScript.JavaScript;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Enum;
 using static Repository.Enum.ListEnum;
@@ -18,7 +15,7 @@ namespace CrawlDataTruyen
         {
             InitializeComponent();
             txtLinkCrawl.Text = "https://dtruyen.com/thap-nien-70-tieu-tho-may-xinh-dep/";
-            
+
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
             radibtnMp3.Checked = RuntimeContext.TypeFile == TypeFile.MP3;
@@ -36,9 +33,12 @@ namespace CrawlDataTruyen
 
         void StartCreateComboxBox()
         {
-            cboCrawlFromPage.Items.Add(ListEnum.EnumPage.WikiDich);
-            cboCrawlFromPage.Items.Add(ListEnum.EnumPage.DTruyen);
-            cboCrawlFromPage.SelectedIndex = (int)RuntimeContext.EnumPage;
+            var listEnum = Enum.GetValues(typeof(EnumWeb)).ToEnumerable().Select(e => e.ToString()).ToArray();
+            if(listEnum != null)
+            {
+                cboCrawlFromPage.Items.AddRange(listEnum);
+                cboCrawlFromPage.SelectedIndex = (int)RuntimeContext.EnumWeb;
+            }
         }
 
 
@@ -158,7 +158,7 @@ namespace CrawlDataTruyen
 
         private void cboCrawlFromPage_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RuntimeContext.EnumPage = (EnumPage)cboCrawlFromPage.SelectedIndex;
+            RuntimeContext.EnumWeb = (EnumWeb)cboCrawlFromPage.SelectedIndex;
         }
 
         private void radibtnMp3_CheckedChanged(object sender, EventArgs e)

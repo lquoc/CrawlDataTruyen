@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CrawlDataService.Service
 {
-    public class CrawlNovelFromWiki : CrawlNovelSerivce
+    public class CrawlNovelFromWikidich : CrawlNovelSerivce
     {
 
         int pageNovel = 1;
@@ -15,7 +15,7 @@ namespace CrawlDataService.Service
         public string pathIndex;
         readonly ChangeTextToVoice changeTextToVoiceService;
         readonly MP4Service mp4Service;
-        public CrawlNovelFromWiki(IServiceProvider service)
+        public CrawlNovelFromWikidich(IServiceProvider service)
         {
             this.pathIndex = "https://truyenwikidich.net/book/index?bookId=";
             changeTextToVoiceService = service.GetRequiredService<ChangeTextToVoice>();
