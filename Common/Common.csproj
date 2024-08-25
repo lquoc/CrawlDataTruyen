@@ -24,6 +24,9 @@
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="KeyAPIGGCloud\soy-extension-432808-v1-1f6c9dbaabdc.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="KeyAPIGGCloud\soy-extension-432808-v1-3442f5169050.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
