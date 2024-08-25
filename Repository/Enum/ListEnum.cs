@@ -2,9 +2,9 @@
 {
     public static class ListEnum
     {
-        public enum EnumPage
+        public enum EnumWeb
         {
-            WikiDich = 0,
+            Wikidich = 0,
             DTruyen = 1,
         }
         public enum TypeFile
