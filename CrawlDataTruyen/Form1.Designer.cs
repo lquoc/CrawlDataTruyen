@@ -52,7 +52,6 @@
             radioMultiNovel = new RadioButton();
             radiobtnOneNovel = new RadioButton();
             btnCancel = new Button();
-            rtbConsole = new RichTextBox();
             groupChangeText.SuspendLayout();
             groupCrawlDataInfo.SuspendLayout();
             SuspendLayout();
@@ -227,7 +226,7 @@
             groupChangeText.Controls.Add(txtPathFolderVoice);
             groupChangeText.Location = new Point(594, 24);
             groupChangeText.Name = "groupChangeText";
-            groupChangeText.Size = new Size(487, 339);
+            groupChangeText.Size = new Size(496, 339);
             groupChangeText.TabIndex = 19;
             groupChangeText.TabStop = false;
             groupChangeText.Text = "Change Text To";
@@ -308,20 +307,11 @@
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += btnCancel_Click;
             // 
-            // rtbConsole
-            // 
-            rtbConsole.Location = new Point(26, 467);
-            rtbConsole.Name = "rtbConsole";
-            rtbConsole.Size = new Size(1055, 268);
-            rtbConsole.TabIndex = 22;
-            rtbConsole.Text = "";
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1093, 747);
-            Controls.Add(rtbConsole);
+            ClientSize = new Size(1113, 427);
             Controls.Add(btnCancel);
             Controls.Add(btn_Start);
             Controls.Add(groupChangeText);
@@ -361,6 +351,5 @@
         private Button btnCancel;
         private CheckBox cbChangeProxy;
         private TextBox txtKeyAPIProxy;
-        private RichTextBox rtbConsole;
     }
 }

@@ -12,7 +12,7 @@ namespace CrawlDataService
         {
             try
             {
-                var pathCombie = Path.Combine(path, nameFile);
+                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars()).Trim();
                 var client = RuntimeContext._serviceProvider.GetRequiredService<IAmazonPolly>();
                 using (var fileStream = new FileStream($"{pathCombie}.mp3", FileMode.Create, FileAccess.Write))
                 {
@@ -58,7 +58,6 @@ namespace CrawlDataService
                 }.Build();
 
 
-
                 List<byte[]> audioParts = new List<byte[]>();
 
                 foreach (var part in parts)
@@ -96,11 +95,11 @@ namespace CrawlDataService
             try
             {
                 RuntimeContext.logger.Info($"Start create file mp3 for chapter {indexChapter}");
-                var pathCombie = Path.Combine(path, nameFile);
+                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars()).Trim();
                 var parts = SplitTextByBytes(longText, 5000);
                 var client = new TextToSpeechClientBuilder
                 {
-                    CredentialsPath = Path.Combine(AppContext.BaseDirectory, "KeyAPIGGCloud", "soy-extension-432808-v1-3442f5169050.json")
+                    CredentialsPath = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "KeyAPIGGCloud"), "*.json").FirstOrDefault()
                 }.Build();
 
                 List<byte[]> audioParts = new List<byte[]>();
@@ -141,29 +140,33 @@ namespace CrawlDataService
             }
         }
 
-        static List<string> SplitTextByBytes(string text, int maxBytes)
+        public List<string> SplitTextByBytes(string text, int maxBytes)
         {
-            List<string> parts = new List<string>();
-            byte[] textBytes = Encoding.UTF8.GetBytes(text);
-            int currentIndex = 0;
-            while (currentIndex < textBytes.Length)
+            var result = new List<string>();
+            int textLength = text.Length;
+            int start = 0;
+
+            while (start < textLength)
             {
-                int bytesToTake = Math.Min(maxBytes, textBytes.Length - currentIndex);
-                int endIndex = currentIndex + bytesToTake;
-                while (endIndex > currentIndex && (textBytes[endIndex - 1] & 0xC0) == 0x80)
+                int length = 1;
+                while (length <= maxBytes && (start + length) <= textLength)
                 {
-                    endIndex--;
+                    string part = text.Substring(start, length);
+                    byte[] partBytes = Encoding.UTF8.GetBytes(part);
+
+                    if (partBytes.Length > maxBytes)
+                    {
+                        break;
+                    }
+
+                    length++;
                 }
-                if (endIndex == currentIndex)
-                {
-                    throw new Exception("Unable to split the text without breaking a UTF-8 character.");
-                }
-                string part = Encoding.UTF8.GetString(textBytes, currentIndex, endIndex - currentIndex);
-                parts.Add(part);
-                currentIndex = endIndex;
+
+                result.Add(text.Substring(start, length - 1));
+                start += length - 1;
             }
 
-            return parts;
+            return result;
         }
     }
 }

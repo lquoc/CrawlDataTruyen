@@ -25,14 +25,14 @@ namespace CrawlDataTruyen
             radioMultiNovel.Checked = RuntimeContext.TypeCrawl == TypeCrawl.MultiNovel;
             txtKeyAPIProxy.Enabled = false;
             StartCreateComboxBox();
-            InitRickTextBox();
+            //InitRickTextBox();
         }
-        void InitRickTextBox()
-        {
-            var consoleOutput = new ConsoleOutput(rtbConsole);
-            Console.SetOut(consoleOutput);
-            rtbConsole.ReadOnly = true;
-        }
+        //void InitRickTextBox()
+        //{
+        //    var consoleOutput = new ConsoleOutput(rtbConsole);
+        //    Console.SetOut(consoleOutput);
+        //    rtbConsole.ReadOnly = true;
+        //}
 
         void StartCreateComboxBox()
         {
