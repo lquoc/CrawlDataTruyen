@@ -68,9 +68,9 @@ namespace CrawlDataTruyen
             btn_Start.Enabled = false;
 
             var managerService = RuntimeContext._serviceProvider.GetRequiredService<ManagerService>();
-            Task.Run(async () =>
+            Task.Run(() =>
             {
-                await managerService.StartService();
+                managerService.StartService();
             });
 
         }

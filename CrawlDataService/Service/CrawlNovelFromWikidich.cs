@@ -11,7 +11,6 @@ namespace CrawlDataService.Service
     {
 
         int pageNovel = 1;
-        public List<string> listPathNovel = new();
         public string pathIndex;
         readonly ChangeTextToVoice changeTextToVoiceService;
         readonly MP4Service mp4Service;
@@ -22,10 +21,11 @@ namespace CrawlDataService.Service
             mp4Service = service.GetRequiredService<MP4Service>();
         }
 
-        public void GetNovelPath(int pageNumber, string pathSearch)
+        public override List<string>? GetLinksNovel(string pathSearch)
         {
-            if (string.IsNullOrEmpty(pathSearch)) return;
-            logger.Info($"Start crawl path novel page:{pageNumber}");
+            var links = new List<string>();
+            if (string.IsNullOrEmpty(pathSearch)) return links;
+            logger.Info($"Start crawl link novel at path:{pathSearch}");
             try
             {
                 pathSearch = PropertyExtension.CheckPathWeb(pathSearch);
@@ -37,30 +37,30 @@ namespace CrawlDataService.Service
                 var infoCol = bookListNode?.GetListHtmlNode("div", "class", "info-col");
                 var pathHrefs = infoCol?.GetListHtmlNode("a", "class", "tooltipped");
                 var pathNovels = pathHrefs?.Select(e => e.Attributes["href"].Value).ToList();
-                if (pathNovels is null || pathNovels.Count == 0) return;
-                listPathNovel.AddRange(pathNovels);
-                
+                if (pathNovels is null || pathNovels.Count == 0) return links;
+                links.AddRange(pathNovels);
+                logger.Info($"End crawl link novel at path:{pathSearch}");
                 //get href next page
-                var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
-                var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
-                var hrefLink = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-right").Any()).Select(e => e.Descendants("a").FirstOrDefault().Attributes["href"].Value).FirstOrDefault();
-                logger.Info($"End crawl path novel page:{pageNumber}");
+                //var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
+                //var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
+                //var hrefLink = effectNodes?.Where(e => e.GetListHtmlNode("i", "class", "fa fa-angle-right").Any()).Select(e => e.Descendants("a").FirstOrDefault().Attributes["href"].Value).FirstOrDefault();
             }
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl path novel, msg: {ex}");
             }
+            return links;
         }
 
         public override async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
         {
             try
             {
-                GetNovelPath(1, pathSearch);
+                var listPathNovel = GetLinksNovel(pathSearch);
                 HashSet<string> novelCrawled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 novelCrawled = ReadFile.ReadFileTxt();
-                listPathNovel = listPathNovel.Where(x => !novelCrawled.Contains(x)).ToList();
-                MultiThreadHelper.MultiThread(listPathNovel, numberBatch, pathSave, pathSaveVoice, StartGetInfoNovelAndChapter);
+                listPathNovel = listPathNovel?.Where(x => !novelCrawled.Contains(x)).ToList();
+                MultiThreadHelper.MultiThread(listPathNovel, numberBatch, pathSave, pathSaveVoice, StartGetInfoNovel);
                 //WriteFile.WriteFileXLSX(pathSave, $"Report_{DateTime.Now.ToString("ddMMyyyyHHmmss")}.xlsx", dicNovel);
             }
             catch (Exception ex)
@@ -99,8 +99,23 @@ namespace CrawlDataService.Service
 
         }
 
-        public async Task<List<string>> GetAllChapterLink(string novelName, string idNovel, string signKey, int numberFuzzy)
+        public override List<string>? GetAllLinksChapter(string pathNovel)
         {
+            #region info to get allchapter link
+            pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
+            string html = pathNovel.DownloadStringWebClient();
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+            //get name of novel
+            var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText;
+            //get novel id
+            var Idbook = htmlDoc.GetHtmlNode("input", "id", "bookId")?.Attributes["Value"].Value;
+            //get signKey
+            var signKey = htmlDoc.GetSignInKey();
+            //get function fuzzy
+            int numberFuzzy = htmlDoc.GetNumberFuzzy();
+            #endregion
+
             var startChapter = 0;
             var size = 501;
             var isTrue = true;
@@ -108,26 +123,26 @@ namespace CrawlDataService.Service
             List<string> allChapterPath = new();
             while (isTrue)
             {
-                logger.Info($"Start get chapter of novel name:{novelName}, start:{startChapter}, size: {size}");
+                logger.Info($"Start get chapter of novel name:{nameNovel}, start:{startChapter}, size: {size}");
                 //create sign value and path index.
                 var sign = (signKey + startChapter.ToString() + size.ToString()).FuzzySign(numberFuzzy).SignFunc();
-                var linkIndexChapter = $"{pathIndex}{idNovel}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
-                string html = "";
+                var linkIndexChapter = $"{pathIndex}{Idbook}&start={startChapter}&size={size}&signKey={signKey}&sign={sign}";
+                string htmlChapter = "";
                 try
                 {
 
-                    html = linkIndexChapter.DownloadStringWebClient();
-                    HtmlDocument htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(html);
+                    htmlChapter = linkIndexChapter.DownloadStringWebClient();
+                    HtmlDocument htmlChapterDoc = new HtmlDocument();
+                    htmlChapterDoc.LoadHtml(htmlChapter);
                     //get link of chapter
-                    var listTagLi = htmlDoc.GetListHtmlNode("li", "class", "chapter-name");
+                    var listTagLi = htmlChapterDoc.GetListHtmlNode("li", "class", "chapter-name");
                     var listTagA = listTagLi?.GetListHtmlNode("a", "class", "truncate");
                     var getHrefValue = listTagA?.Select(e => e.Attributes["href"].Value).ToList();
 
                     //get index last chapter
                     if (lastChapter == 0)
                     {
-                        var pageNode = htmlDoc.GetHtmlNode("ul", "class", "pagination");
+                        var pageNode = htmlChapterDoc.GetHtmlNode("ul", "class", "pagination");
                         var effectNodes = pageNode?.GetListHtmlNode("li", "class", "waves-effect");
                         effectNodes?.AddRange(pageNode?.GetListHtmlNode("li", "class", " waves-effect "));
                         var numberPathOfEffects = effectNodes?.Select(e => e.GetHtmlNode("a", "data-action", "loadBookIndex")?.Attributes["data-start"].Value).ToList();
@@ -136,17 +151,17 @@ namespace CrawlDataService.Service
                             lastChapter = lastPage.Value;
                     }
                     allChapterPath.AddRange(getHrefValue);
-                    logger.Info($"End get chapter of novel id:{novelName}, start:{startChapter}, size: {size}");
+                    logger.Info($"End get chapter of novel id:{nameNovel}, start:{startChapter}, size: {size}");
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Error while get path chapter of novel {novelName}");
+                    logger.Error($"Error while get path chapter of novel {nameNovel}");
                 }
 
                 if (string.IsNullOrEmpty(html) || startChapter == lastChapter)
                 {
                     isTrue = false;
-                    logger.Info($"End get chapter of novel id:{idNovel}");
+                    logger.Info($"End get chapter of novel id:{Idbook}");
                 }
                 else
                 {
@@ -156,9 +171,9 @@ namespace CrawlDataService.Service
             return allChapterPath;
         }
 
-        public override async Task StartGetInfoNovelAndChapter(string pathNovel, string pathSave, string pathSaveVoice)
+        public override async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
         {
-            if (string.IsNullOrEmpty(pathNovel)) return;
+            if (string.IsNullOrEmpty(pathNovel)) return null;
             try
             {
                 int chapterNumber = 1;
@@ -179,7 +194,7 @@ namespace CrawlDataService.Service
 
                 //get function fuzzy
                 int numberFuzzy = htmlDoc.GetNumberFuzzy();
-                var allChapter = await GetAllChapterLink(nameNovel, Idbook, signKey, numberFuzzy);
+                //var allChapter = await GetAllChapterLink(nameNovel, Idbook, signKey, numberFuzzy);
 
                 //get path img of novel
                 var imgNode = htmlDoc.GetHtmlNode("img", "class", "z-depth-1 materialboxed");
@@ -214,7 +229,7 @@ namespace CrawlDataService.Service
                     Name = nameNovel,
                     Genre = gener,
                     //IsFull = status.GetStatus(),
-                    NumberChapter = allChapter.Count().ToString(),
+                    //NumberChapter = allChapter.Count().ToString(),
                     Author = author,
                     Description = description,
                     ImgPathLocal = imgPathLocal,
@@ -222,30 +237,31 @@ namespace CrawlDataService.Service
                     PathLocal = pathFolder
                 };
 
-                if (RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.MultiNovel)
-                {
-                    allChapter.SingleForEach(novel, GetContentChapter);
-                }
-                else if (RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.OneNovel)
-                {
-                    allChapter.MultiThreadParralle((allChapter.Count / RuntimeContext.MaxThread) + RuntimeContext.MaxThread, novel, GetContentChapter);
-                }
+                //if (RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.MultiNovel)
+                //{
+                //    allChapter.SingleForEach(novel, GetContentChapter);
+                //}
+                //else if (RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.OneNovel)
+                //{
+                //    allChapter.MultiThreadParralle((allChapter.Count / RuntimeContext.MaxThread) + RuntimeContext.MaxThread, novel, GetContentChapter);
+                //}
 
                 WriteFile.WriteFileTxt(novel.GetString());
                 logger.Info($"End crawl data novel {nameNovel}");
-
+                return novel;
             }
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {pathNovel}, msg: {ex}");
                 chapterLog.Info(PropertyExtension.FormatErrorChapter(true, null, pathNovel, 0, null, null));
             }
+            return null;
         }
 
-        public async Task GetContentChapter(int chaper, string? pathChapter, Novel novel)
+        public override async Task<ChapterInfo?> GetContentChapter(int chaper, Novel novel, string? pathChapter)
         {
 
-            if (string.IsNullOrEmpty(pathChapter)) return;
+            if (string.IsNullOrEmpty(pathChapter)) return null;
             pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
             //if (chaper % 50 == 0) Thread.Sleep(25000);
             string[] titleChapters = new string[10];
@@ -265,23 +281,18 @@ namespace CrawlDataService.Service
                 var contentDoc = htmlDoc.GetHtmlNode("div", "class", "content-body-wrapper");
                 var contentNodes = contentDoc?.GetHtmlNode("div", "id", "bookContentBody");
                 var content = GetContentFromHTML(contentNodes);
-                WriteFile.WriteFileTxt(novel.PathLocal.Trim(), titleChapter.RemoveDiacriticsAndSpaces(), content);
-                if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP3)
+                return new ChapterInfo
                 {
-                    await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(content, novel.VoiceOrMP4Path, titleChapter.RemoveDiacriticsAndSpaces(), chaper);
-                }
-                else if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP4)
-                {
-                    await mp4Service.CreateVideoFromMp3AndImages(content, novel.ImgPathLocal, novel.VoiceOrMP4Path, titleChapter.RemoveDiacriticsAndSpaces(), chaper);
-                }
-                return;
+                    TitleChapter = titleChapter,
+                    ContentChapter = content
+                };
             }
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {novel.Name}, chapter: {chaper}, msg: {ex}");
                 chapterLog.Info(PropertyExtension.FormatErrorChapter(false, novel.Name, null, chaper, pathChapter, novel.PathLocal));
-                return;
             }
+            return null;
         }
 
         private string GetContentFromHTML(HtmlNode? htmlNode)
