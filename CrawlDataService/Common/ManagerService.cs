@@ -96,6 +96,7 @@ namespace CrawlDataService.Common
                 var currentTaskCount = listAllChapter.Count / numberBatch + (listAllChapter.Count % numberBatch > 0 ? 1 : 0);
                 var batchNumber = currentTaskCount > RuntimeContext.MaxThread ? (listAllChapter.Count / RuntimeContext.MaxThread + (listAllChapter.Count % RuntimeContext.MaxThread > 0 ? 1 : 0)) : numberBatch;
                 var tasks = new List<Task>();
+                //need update logic
                 int temp = 0;
                 foreach (var batch in listAllChapter.Chunk(batchNumber))
                 {
