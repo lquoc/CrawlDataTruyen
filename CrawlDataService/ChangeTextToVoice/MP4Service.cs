@@ -15,7 +15,7 @@ namespace CrawlDataService
             changeTextToSpeechService = serviceProvider.GetRequiredService<ChangeTextToVoice>();
         }
 
-        public async Task CreateVideoFromMp3AndImages(string contentChapter, string imgNovel, string pathSave, string nameFile, int indexChapter)
+        public async Task CreateVideoFromMp3AndImages(string contentChapter, string imgNovel, string pathSave, string nameFile)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace CrawlDataService
             }
             catch (Exception ex)
             {
-                RuntimeContext.logger.Error($"Error while create file mp4, chapter {indexChapter}, msg: {ex}");
+                RuntimeContext.logger.Error($"Error while create file mp4, chapter {nameFile}, msg: {ex}");
             }
         }
 

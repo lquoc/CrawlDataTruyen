@@ -69,13 +69,12 @@ namespace CrawlDataService.Common
                         {
                             var novel = await service.StartGetInfoNovel(novelPath, pathSaveLocel, PathSaveFileMp3OrMp4);
                             var listAllChapter = service.GetAllLinksChapter(novelPath);
-                            int temp = 1;
                             if (novel != null && listAllChapter != null)
                             {
                                 foreach (var item in listAllChapter)
                                 {
-                                    var chapterInfo = await service.GetContentChapter(temp++, novel, item);
-                                    WriteFileTextAndMp3OrMp4(novel, chapterInfo, temp);
+                                    var chapterInfo = await service.GetContentChapter(novel, item);
+                                    WriteFileTextAndMp3OrMp4(novel, chapterInfo);
                                 }
                             }
                         }
@@ -96,8 +95,6 @@ namespace CrawlDataService.Common
                 var currentTaskCount = listAllChapter.Count / numberBatch + (listAllChapter.Count % numberBatch > 0 ? 1 : 0);
                 var batchNumber = currentTaskCount > RuntimeContext.MaxThread ? (listAllChapter.Count / RuntimeContext.MaxThread + (listAllChapter.Count % RuntimeContext.MaxThread > 0 ? 1 : 0)) : numberBatch;
                 var tasks = new List<Task>();
-                //need update logic
-                int temp = 0;
                 foreach (var batch in listAllChapter.Chunk(batchNumber))
                 {
                     var task = Task.Factory.StartNew(async () =>
@@ -106,9 +103,8 @@ namespace CrawlDataService.Common
                         {
                             if (RuntimeContext.IsStart)
                             {
-                                temp++;
-                                var chapterInfo = await service.GetContentChapter(temp++, novel, chapterPath);
-                                WriteFileTextAndMp3OrMp4(novel, chapterInfo, temp);
+                                var chapterInfo = await service.GetContentChapter(novel, chapterPath);
+                                WriteFileTextAndMp3OrMp4(novel, chapterInfo);
                             }
                         }
                     });
@@ -118,16 +114,16 @@ namespace CrawlDataService.Common
             }
         }
         
-        public async void WriteFileTextAndMp3OrMp4(Novel novel, ChapterInfo? chapterInfo, int temp)
+        public async void WriteFileTextAndMp3OrMp4(Novel novel, ChapterInfo? chapterInfo)
         {
             WriteFile.WriteFileTxt(novel.PathLocal.Trim(), chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces(), chapterInfo?.ContentChapter);
             if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP3)
             {
-                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(chapterInfo?.ContentChapter, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces(), temp);
+                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(chapterInfo?.ContentChapter, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces());
             }
             else if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP4)
             {
-                await mp4Service.CreateVideoFromMp3AndImages(chapterInfo?.ContentChapter, novel.ImgPathLocal, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces(), temp);
+                await mp4Service.CreateVideoFromMp3AndImages(chapterInfo?.ContentChapter, novel.ImgPathLocal, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces());
             }
         }
     }

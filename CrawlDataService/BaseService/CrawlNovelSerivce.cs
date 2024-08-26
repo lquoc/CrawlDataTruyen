@@ -10,28 +10,14 @@ namespace CrawlDataService.Service
         public MyLogger logger = MyLogger.GetInstance();
         public ChapterErrorLogger chapterLog = ChapterErrorLogger.GetInstance();
 
-        public virtual async Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
-        {
-        }
+        public abstract Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch);
 
-        public virtual List<string>? GetLinksNovel(string path)
-        {
-            return null;
-        }
+        public abstract List<string>? GetLinksNovel(string path);
 
-        public virtual async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
-        {
-            return null;
-        }
+        public abstract Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice);
 
-        public virtual List<string>? GetAllLinksChapter(string pathNovel)
-        {
-            return null;
-        }
+        public abstract List<string>? GetAllLinksChapter(string pathNovel);
 
-        public virtual async Task<ChapterInfo?> GetContentChapter(int chaper, Novel novel, string? pathChapter)
-        {
-            return null;
-        }
+        public abstract Task<ChapterInfo?> GetContentChapter(Novel novel, string? pathChapter);
     }
 }

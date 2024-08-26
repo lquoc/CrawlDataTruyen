@@ -112,11 +112,25 @@ namespace Common
             return path;
         }
 
-        public static string FormatErrorChapter(bool isNovelError, string novelName, string? pathNovel, int chapterNumber, string? pathChapter, string? pathChapterLocal)
+        public static string FormatErrorChapter(bool isNovelError, string novelName, string? pathNovel, string? pathChapter, string? pathChapterLocal)
         {
-            return $"IsNovelError: {isNovelError}{Constant.Seperation} NovelName: {novelName}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} ChapterNumber: {chapterNumber}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
+            return $"IsNovelError: {isNovelError}{Constant.Seperation} NovelName: {novelName}{Constant.Seperation} PathNovel: {pathNovel}{Constant.Seperation} PathChapter: {pathChapter} {Constant.Seperation} PathChapterLocal: {pathChapterLocal}";
         }
+        public static string FirstSplit(this string content, string separator)
+        {
+            int index = content.IndexOf(separator);
 
+            if (index != -1)
+            {
+                string beforeDash = content.Substring(0, index);
+                string afterDash = content.Substring(index + 1);
+                return afterDash;
+            }
+            else
+            {
+                return content;
+            }
+        }
 
         public static string DownloadStringWeb(this string path)
         {

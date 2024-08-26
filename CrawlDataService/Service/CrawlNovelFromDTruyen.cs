@@ -106,7 +106,7 @@ namespace CrawlDataService
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {pathNovel}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, null, pathNovel, 0, null, null));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(true, null, pathNovel, null, null));
             }
             return null;
         }
@@ -187,13 +187,13 @@ namespace CrawlDataService
             return links;
         }
 
-        public override async Task<ChapterInfo?> GetContentChapter(int chaper, Novel novel, string? pathChapter)
+        public override async Task<ChapterInfo?> GetContentChapter(Novel novel, string? pathChapter)
         {
             if (string.IsNullOrEmpty(pathChapter)) return null;
             pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
             try
             {
-                logger.Info($"Start crawl novel:{novel.Name}, chapter: {chaper}");
+                logger.Info($"Start crawl novel:{novel.Name}, chapter: {pathChapter}");
                 HtmlDocument htmlDoc = new HtmlDocument();
                 var html = pathChapter.DownloadStringWebClient();
                 htmlDoc.LoadHtml(html);
@@ -202,7 +202,7 @@ namespace CrawlDataService
                 var tagDivChapterPage = htmlDoc.GetHtmlNode("div", "id", "chapter-page");
 
                 //get title of chapter
-                var titleChapter = htmlDoc.DocumentNode.Descendants("title").FirstOrDefault()?.InnerText.Split("-")[1];
+                var titleChapter = htmlDoc.DocumentNode.Descendants("title").FirstOrDefault()?.InnerText.FirstSplit("-");
 
                 //get tag div chapter
                 var tagDivChapter = tagDivChapterPage?.GetHtmlNode("div", "id", "chapter");
@@ -219,8 +219,8 @@ namespace CrawlDataService
             }
             catch (Exception ex)
             {
-                logger.Error($"Error while crawl data novel {novel.Name}, chapter: {chaper}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, novel.Name, null, chaper, pathChapter, novel.PathLocal));
+                logger.Error($"Error while crawl data novel {novel.Name}, chapter: {pathChapter}, msg: {ex}");
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, novel.Name, null, pathChapter, novel.PathLocal));
             }
             return null;
         }
