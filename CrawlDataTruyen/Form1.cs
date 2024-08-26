@@ -164,11 +164,14 @@ namespace CrawlDataTruyen
         private void radibtnMp3_CheckedChanged(object sender, EventArgs e)
         {
             RuntimeContext.TypeFile = TypeFile.MP3;
+            txtThreadNumber.Enabled = true;
         }
 
         private void radiobtnMP4_CheckedChanged(object sender, EventArgs e)
         {
             RuntimeContext.TypeFile = TypeFile.MP4;
+            txtThreadNumber.Enabled = false;
+            txtThreadNumber.Text = "1";
         }
 
         private void radiobtnOneNovel_CheckedChanged(object sender, EventArgs e)

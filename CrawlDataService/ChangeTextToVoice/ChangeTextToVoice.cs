@@ -12,7 +12,7 @@ namespace CrawlDataService
         {
             try
             {
-                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars()).Trim();
+                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars().Trim()).Trim();
                 var client = RuntimeContext._serviceProvider.GetRequiredService<IAmazonPolly>();
                 using (var fileStream = new FileStream($"{pathCombie}.mp3", FileMode.Create, FileAccess.Write))
                 {
@@ -90,12 +90,12 @@ namespace CrawlDataService
             return null;
         }
 
-        public async Task RequestCreateSpeechGoogleCloudy(string longText = "", string path = "", string nameFile = "", int indexChapter = 0)
+        public async Task RequestCreateSpeechGoogleCloudy(string longText = "", string path = "", string nameFile = "")
         {
             try
             {
-                RuntimeContext.logger.Info($"Start create file mp3 for chapter {indexChapter}");
-                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars()).Trim();
+                RuntimeContext.logger.Info($"Start create file mp3 for chapter {nameFile}");
+                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars().Trim()).Trim();
                 var parts = SplitTextByBytes(longText, 5000);
                 var client = new TextToSpeechClientBuilder
                 {
@@ -132,7 +132,7 @@ namespace CrawlDataService
                         output.Write(part, 0, part.Length);
                     }
                 }
-                RuntimeContext.logger.Info($"End create file mp3 for chapter {indexChapter}");
+                RuntimeContext.logger.Info($"End create file mp3 for chapter {nameFile}");
             }
             catch (Exception ex)
             {
