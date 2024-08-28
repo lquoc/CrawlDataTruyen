@@ -2,11 +2,13 @@
 {
     public static class ListEnum
     {
-        public enum EnumWeb
+        public enum NovelWeb
         {
             Wikidich = 0,
             DTruyen = 1,
+            Nettruyen = 2,
         }
+
         public enum TypeFile
         {
             MP3 = 0,

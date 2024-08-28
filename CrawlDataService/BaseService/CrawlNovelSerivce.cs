@@ -9,6 +9,7 @@ namespace CrawlDataService.Service
     {
         public MyLogger logger = MyLogger.GetInstance();
         public ChapterErrorLogger chapterLog = ChapterErrorLogger.GetInstance();
+        public bool IsManga = false;
 
         public abstract Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch);
 

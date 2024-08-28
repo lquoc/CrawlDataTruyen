@@ -2,7 +2,6 @@
 using Common.MultiThread;
 using CrawlDataService.Service;
 using HtmlAgilityPack;
-using Microsoft.Extensions.DependencyInjection;
 using Repository.Model;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -36,7 +35,6 @@ namespace CrawlDataService
             if (string.IsNullOrEmpty(pathNovel)) return null;
             try
             {
-                int chapterNumber = 1;
                 pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
 
                 string html = pathNovel.DownloadStringWebClient();
@@ -65,7 +63,7 @@ namespace CrawlDataService
                 //get img novel
                 var getTagDivImg = novelDetail?.GetHtmlNode("div", "class", "thumb");
                 var imgPath = getTagDivImg?.GetHtmlNode("img", "itemprop", "image")?.Attributes["src"].Value;
-                
+
                 //get discription novel
                 var description = novelDetail?.GetHtmlNode("div", "class", "description")?.InnerText;
 
@@ -74,9 +72,9 @@ namespace CrawlDataService
                 //var allChapter = GetAllLinkChapterInNovel(pathNovel);
 
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
-                
+
                 var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
-                
+
                 var imgPathLocal = imgPath.DownloadImgage(pathFolder);
 
                 var novel = new Novel
@@ -110,7 +108,7 @@ namespace CrawlDataService
             }
             return null;
         }
-        
+
         public override List<string> GetAllLinksChapter(string pathNovel)
         {
             var links = new List<string>();
@@ -210,7 +208,7 @@ namespace CrawlDataService
                 //get content of chapter
                 var tagDivChapterContent = tagDivChapter?.GetHtmlNode("div", "id", "chapter-content");
                 var contentHtml = tagDivChapterContent.InnerText;
-                var content = GetContentFromHTML(tagDivChapterContent);          
+                var content = GetContentFromHTML(tagDivChapterContent);
                 return new ChapterInfo
                 {
                     TitleChapter = titleChapter,
