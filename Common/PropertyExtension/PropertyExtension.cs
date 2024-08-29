@@ -145,6 +145,7 @@ namespace Common
 
         public static string DownloadStringWebClient(this string path)
         {
+            path = CheckPathWeb(path);
             var html = "";
             int i = 0;
             do
@@ -166,7 +167,7 @@ namespace Common
                     RuntimeContext.logger.Warn($"Sleep {2 * RuntimeContext.MaxThread}s, msg: {ex.Message}");
                     Thread.Sleep(2000 * RuntimeContext.MaxThread);
                 }
-            } while (string.IsNullOrEmpty(html));
+            } while (string.IsNullOrEmpty(html) && RuntimeContext.IsStart);
             return html;
         }
 

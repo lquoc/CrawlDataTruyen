@@ -2,19 +2,20 @@
 using CrawlDataService.Service;
 using HtmlAgilityPack;
 using Repository.Model;
+using System.Diagnostics.Metrics;
 
 namespace CrawlDataService
 {
     public class CrawlMangaFromNettruyen : CrawlNovelSerivce
     {
-        public CrawlMangaFromNettruyen()
+        public CrawlMangaFromNettruyen(IServiceProvider service)
         {
             IsManga = true;
         }
 
         public override List<string>? GetAllLinksChapter(string pathNovel)
         {
-            if (string.IsNullOrEmpty(pathNovel)) return null;
+            if (string.IsNullOrEmpty(pathNovel) || !RuntimeContext.IsStart) return null;
             try
             {
                 logger.Info($"Start crawl all links chapter");
@@ -42,7 +43,7 @@ namespace CrawlDataService
 
         public override async Task<ChapterInfo?> GetContentChapter(Novel novel, string? pathChapter)
         {
-            if (string.IsNullOrEmpty(pathChapter)) return null;
+            if (string.IsNullOrEmpty(pathChapter) || !RuntimeContext.IsStart) return null;
             try
             {
                 logger.Info($"Start crawl novel:{novel.Name}, chapter: {pathChapter}");
@@ -82,9 +83,59 @@ namespace CrawlDataService
             return null;
         }
 
-        public override List<string>? GetLinksNovel(string path)
+        public override List<string>? GetLinksNovel(string pathSearch)
         {
-            throw new NotImplementedException();
+            var links = new List<string>();
+            if (string.IsNullOrEmpty(pathSearch) || !RuntimeContext.IsStart) return links;
+            logger.Info($"Start crawl path novel page: {pathSearch}");
+            int i = 0;
+            int endPage = 0;
+            while (true)
+            {
+                i++;
+                try
+                {
+                    logger.Info($"Start crawl novel in page: {i}");
+                    if (pathSearch.Contains("?page="))
+                    {
+                        pathSearch = pathSearch.Substring(0, pathSearch.IndexOf("?page=")) + $"?page={i}";
+                    }
+                    else
+                    {
+                        pathSearch = pathSearch + $"?page={i}";
+                    }
+                    var html = pathSearch.DownloadStringWebClient();
+                    HtmlDocument htmlDoc = new HtmlDocument();
+                    htmlDoc.LoadHtml(html);
+
+                    //get all href novels of page
+                    var tagMain = htmlDoc.GetHtmlNode("main", "class", "main");
+                    var tagDivCenter = tagMain?.GetHtmlNode("div", "id", "ctl00_divCenter");
+                    var tagDivItems = tagDivCenter?.GetHtmlNode("div", "class", "items");
+                    var tagDivItemList = tagDivItems?.GetListHtmlNode("div", "class", "item");
+                    var tagDivImageList = tagDivItemList?.GetListHtmlNode("div", "class", "image");
+                    var tagAList = tagDivImageList?.GetListHtmlNode("a");
+                    var listHrefValue = tagAList?.Select(e => e.Attributes["href"].Value).ToList();
+                    links.AddRange(listHrefValue);
+                    if (i == 1 && endPage == 0)
+                    {
+                        var tagDivPagination = tagDivCenter?.GetHtmlNode("div", "id", "ctl00_mainContent_ctl01_divPager");
+                        var tagAListPagination = tagDivPagination?.GetListHtmlNode("a");
+                        var listInt = tagAListPagination?.Where(e => int.TryParse(e.InnerText, out var number)).Select(e => int.Parse(e.InnerText)).ToList();
+                        if (listInt!= null && listInt.Any())
+                        {
+                            endPage = listInt.Max();
+                        }
+                    }
+                    if (i == endPage || i > endPage) break;
+                    logger.Info($"End crawl novel in page: {i}");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error($"Error while crawl path novel, msg: {ex}");
+                }
+            }
+            return links;
         }
 
         public override Task StartCrawlData(int numberBatch, string pathSave, string pathSaveVoice, string pathSearch)
@@ -95,7 +146,7 @@ namespace CrawlDataService
         public override async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
         {
 
-            if (string.IsNullOrEmpty(pathNovel)) return null;
+            if (string.IsNullOrEmpty(pathNovel) || !RuntimeContext.IsStart) return null;
             try
             {
                 //pathNovel = PropertyExtension.CheckPathWeb(pathNovel);

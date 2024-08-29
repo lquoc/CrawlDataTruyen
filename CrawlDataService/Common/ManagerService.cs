@@ -1,6 +1,5 @@
 ﻿using Common;
 using CrawlDataService.Service;
-using Google.Api;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Model;
 using static Repository.Enum.ListEnum;
@@ -17,7 +16,7 @@ namespace CrawlDataService.Common
             changeTextToVoiceService = service.GetRequiredService<ChangeTextToVoice>();
             mp4Service = service.GetRequiredService<MP4Service>();
         }
-        
+
         // get the service based on the service name and the Enum PageWeb. 
         public CrawlNovelSerivce? CreateInstantService()
         {
@@ -64,7 +63,7 @@ namespace CrawlDataService.Common
             var tasks = new List<Task>();
             foreach (var batch in listNovelPath.Chunk(batchNumber))
             {
-                var task = Task.Factory.StartNew(async () =>
+                var task = Task.Run(async () =>
                 {
                     foreach (var novelPath in batch)
                     {
@@ -87,13 +86,14 @@ namespace CrawlDataService.Common
                 tasks.Add(task);
             }
             await Task.WhenAll(tasks.ToArray());
+            RuntimeContext.logger.Info($"End crawl multi thread novel");
         }
 
         public async Task StartCrawlSingleNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathNovel)
         {
             var novel = await service.StartGetInfoNovel(pathNovel, pathSaveLocel, PathSaveFileMp3OrMp4);
             var listAllChapter = service.GetAllLinksChapter(pathNovel);
-            if(novel != null && listAllChapter != null)
+            if (novel != null && listAllChapter != null)
             {
                 if (listAllChapter is null || listAllChapter.Count() == 0) return;
                 var currentTaskCount = listAllChapter.Count / numberBatch + (listAllChapter.Count % numberBatch > 0 ? 1 : 0);
@@ -121,7 +121,7 @@ namespace CrawlDataService.Common
                 RuntimeContext.logger.Info($"End crawl data novel: {pathNovel}");
             }
         }
-        
+
         public async void WriteFileTextAndMp3OrMp4(Novel novel, ChapterInfo? chapterInfo)
         {
             WriteFile.WriteFileTxt(novel.PathLocal.Trim(), chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces(), chapterInfo?.ContentChapter);
