@@ -69,8 +69,8 @@ namespace Common
             if (string.IsNullOrEmpty(content)) return;
             try
             {
-                logger.Error($"Start write file {nameFile}.txt");
-                var newFileName = nameFile.RemoveInvalidPathChars();
+                logger.Info($"Start write file {nameFile}.txt");
+                var newFileName = nameFile.RemoveInvalidPathChars().Trim();
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path.Replace("\\\\", "\\"));
@@ -80,7 +80,7 @@ namespace Common
                 {
                     writer.WriteLine(content);
                 }
-                logger.Error($"End write file {nameFile}.txt");
+                logger.Info($"End write file {nameFile}.txt");
             }
             catch (Exception ex)
             {

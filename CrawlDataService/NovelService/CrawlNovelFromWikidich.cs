@@ -121,7 +121,7 @@ namespace CrawlDataService.Service
             var isTrue = true;
             var lastChapter = 0;
             List<string> allChapterPath = new();
-            while (isTrue)
+            while (isTrue && RuntimeContext.IsStart)
             {
                 logger.Info($"Start get chapter of novel name:{nameNovel}, start:{startChapter}, size: {size}");
                 //create sign value and path index.
