@@ -17,6 +17,7 @@ namespace CrawlDataService.Common
             changeTextToVoiceService = service.GetRequiredService<ChangeTextToVoice>();
             mp4Service = service.GetRequiredService<MP4Service>();
         }
+        
         // get the service based on the service name and the Enum PageWeb. 
         public CrawlNovelSerivce? CreateInstantService()
         {
@@ -37,7 +38,7 @@ namespace CrawlDataService.Common
             return null;
         }
 
-        public void StartService()
+        public void StartNovelService()
         {
             var crawlNovelService = CreateInstantService();
             var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
@@ -77,6 +78,7 @@ namespace CrawlDataService.Common
                                     WriteFileTextAndMp3OrMp4(novel, chapterInfo);
                                 }
                             }
+                            RuntimeContext.logger.Info($"End crawl data novel: {novelPath}");
                         }
                     }
                 });
@@ -104,13 +106,17 @@ namespace CrawlDataService.Common
                             if (RuntimeContext.IsStart)
                             {
                                 var chapterInfo = await service.GetContentChapter(novel, chapterPath);
-                                WriteFileTextAndMp3OrMp4(novel, chapterInfo);
+                                if (!service.IsManga)
+                                {
+                                    WriteFileTextAndMp3OrMp4(novel, chapterInfo);
+                                }
                             }
                         }
                     });
                     tasks.Add(task);
                 }
                 Task.WaitAll(tasks.ToArray());
+                RuntimeContext.logger.Info($"End crawl data novel: {pathNovel}");
             }
         }
         

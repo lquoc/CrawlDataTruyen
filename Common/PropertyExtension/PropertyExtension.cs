@@ -66,9 +66,14 @@ namespace Common
         {
             return htmlNote.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue)).ToList();
         }
-        public static List<HtmlNode>? GetListHtmlNode(this List<HtmlNode> htmlNote, string tagName, string attributeName, string attributeValue)
+        public static List<HtmlNode>? GetListHtmlNode(this List<HtmlNode>? htmlNote, string tagName, string attributeName, string attributeValue)
         {
-            return htmlNote.SelectMany(e => e.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue))).ToList();
+            return htmlNote?.SelectMany(e => e.Descendants(tagName).Where(e => e.Attributes.Contains(attributeName) && e.Attributes[attributeName].Value.Contains(attributeValue))).ToList();
+        }
+
+        public static List<HtmlNode>? GetListHtmlNode(this List<HtmlNode>? htmlNote, string tagName)
+        {
+            return htmlNote?.SelectMany(e => e.Descendants(tagName)).ToList();
         }
 
         public static string RemoveDiacriticsAndSpaces(this string? name)
@@ -105,9 +110,9 @@ namespace Common
 
         public static string CheckPathWeb(string path)
         {
-            if (!path.Contains(Constant.PathWeb))
+            if (!path.Contains(Constant.PathNovelWeb))
             {
-                return path = $"{Constant.PathWeb}{path}";
+                return path = $"{Constant.PathNovelWeb}{path}";
             }
             return path;
         }

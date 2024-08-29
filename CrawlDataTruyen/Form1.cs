@@ -1,9 +1,7 @@
 ﻿using Common;
-using Common.FakeProxy;
 using CrawlDataService.Common;
 using Microsoft.ClearScript.JavaScript;
 using Microsoft.Extensions.DependencyInjection;
-using Repository.Enum;
 using static Repository.Enum.ListEnum;
 
 namespace CrawlDataTruyen
@@ -33,8 +31,8 @@ namespace CrawlDataTruyen
 
         void StartCreateComboxBox()
         {
-            var listEnum = Enum.GetValues(typeof(EnumWeb)).ToEnumerable().Select(e => e.ToString()).ToArray();
-            if(listEnum != null)
+            var listEnum = Enum.GetValues(typeof(NovelWeb)).ToEnumerable().Select(e => e.ToString()).ToArray();
+            if (listEnum != null)
             {
                 cboCrawlFromPage.Items.AddRange(listEnum);
                 cboCrawlFromPage.SelectedIndex = (int)RuntimeContext.EnumWeb;
@@ -44,7 +42,6 @@ namespace CrawlDataTruyen
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            var test = FakeProxy.GetProxyInfo();
 
 
             if (string.IsNullOrEmpty(RuntimeContext.PathCrawl) || string.IsNullOrEmpty(RuntimeContext.PathSaveLocal))
@@ -70,7 +67,7 @@ namespace CrawlDataTruyen
             var managerService = RuntimeContext._serviceProvider.GetRequiredService<ManagerService>();
             Task.Run(() =>
             {
-                managerService.StartService();
+                managerService.StartNovelService();
             });
 
         }
@@ -158,7 +155,7 @@ namespace CrawlDataTruyen
 
         private void cboCrawlFromPage_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RuntimeContext.EnumWeb = (EnumWeb)cboCrawlFromPage.SelectedIndex;
+            RuntimeContext.EnumWeb = (NovelWeb)cboCrawlFromPage.SelectedIndex;
         }
 
         private void radibtnMp3_CheckedChanged(object sender, EventArgs e)

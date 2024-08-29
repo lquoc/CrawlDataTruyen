@@ -221,7 +221,7 @@ namespace CrawlDataService.Service
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
                 var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
 
-                var imgPathLocal = (Constant.PathWeb + imgPath).DownloadImgage(pathFolder);
+                var imgPathLocal = (Constant.PathNovelWeb + imgPath).DownloadImgage(pathFolder);
 
 
                 var novel = new Novel

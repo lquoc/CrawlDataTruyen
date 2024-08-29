@@ -16,7 +16,7 @@ namespace Common
         public static bool IsStart = false;
 
         //crawl data novel
-        public static ListEnum.EnumWeb EnumWeb = 0;
+        public static ListEnum.NovelWeb EnumWeb = 0;
         public static string PathCrawl = string.Empty;
         public static string PathChapterError = Path.Combine(AppContext.BaseDirectory, "errorchapterlogs","chapterError.log");
         public static string NameFileNovelList = "novelList.txt";

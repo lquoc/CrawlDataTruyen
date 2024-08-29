@@ -2,6 +2,7 @@
 using Common.FakeProxy;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
+using System.Globalization;
 using System.Net;
 using System.Text;
 
@@ -73,6 +74,8 @@ namespace CrawlDataService.Common
             webClient.Headers["Sec-Ch-Ua-Platform"] = "\"Windows\"";
             webClient.Headers["Priority"] = "u=0, i";
             webClient.Headers["Scheme"] = "https";
+            //webClient.Headers["Cache-Control"] = "max-age=0";
+            //webClient.Headers["If-Modified-Since"] = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'", CultureInfo.InvariantCulture);
             webClient.Encoding = Encoding.UTF8;
         }
     }
