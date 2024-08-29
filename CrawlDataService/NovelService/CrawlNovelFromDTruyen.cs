@@ -115,7 +115,7 @@ namespace CrawlDataService
             if (string.IsNullOrEmpty(pathNovel)) return links;
             logger.Info($"Start crawl path chapter in novel: {pathNovel}");
             int i = 0;
-            while (true)
+            while (true && RuntimeContext.IsStart)
             {
                 i++;
                 try

@@ -38,22 +38,24 @@ namespace CrawlDataService.Common
             return null;
         }
 
-        public void StartNovelService()
+        public async Task StartNovelService(Action<bool> action)
         {
             var crawlNovelService = CreateInstantService();
             var getChangeTextToVoice = RuntimeContext._serviceProvider.GetRequiredService<ChangeTextToVoice>();
             var mp4Service = RuntimeContext._serviceProvider.GetService<MP4Service>();
             if (crawlNovelService != null && RuntimeContext.IsStart && RuntimeContext.TypeCrawl == TypeCrawl.MultiNovel)
             {
-                StartCrawlMultiNovel(crawlNovelService, 1, RuntimeContext.PathSaveLocal, RuntimeContext.PathSaveFileMp3, RuntimeContext.PathCrawl);
+                await StartCrawlMultiNovel(crawlNovelService, 1, RuntimeContext.PathSaveLocal, RuntimeContext.PathSaveFileMp3, RuntimeContext.PathCrawl);
             }
             else if (crawlNovelService != null && RuntimeContext.IsStart && RuntimeContext.TypeCrawl == TypeCrawl.OneNovel)
             {
-                StartCrawlSingleNovel(crawlNovelService, 1, RuntimeContext.PathSaveLocal, RuntimeContext.PathSaveFileMp3, RuntimeContext.PathCrawl);
+                await StartCrawlSingleNovel(crawlNovelService, 1, RuntimeContext.PathSaveLocal, RuntimeContext.PathSaveFileMp3, RuntimeContext.PathCrawl);
             }
+            RuntimeContext.IsStart = false;
+            action(true);
         }
 
-        public void StartCrawlMultiNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathSearchNovel)
+        public async Task StartCrawlMultiNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathSearchNovel)
         {
             var listNovelPath = service.GetLinksNovel(pathSearchNovel);
             if (listNovelPath is null || listNovelPath.Count() == 0) return;
@@ -84,10 +86,10 @@ namespace CrawlDataService.Common
                 });
                 tasks.Add(task);
             }
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks.ToArray());
         }
 
-        public async void StartCrawlSingleNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathNovel)
+        public async Task StartCrawlSingleNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathNovel)
         {
             var novel = await service.StartGetInfoNovel(pathNovel, pathSaveLocel, PathSaveFileMp3OrMp4);
             var listAllChapter = service.GetAllLinksChapter(pathNovel);
@@ -115,7 +117,7 @@ namespace CrawlDataService.Common
                     });
                     tasks.Add(task);
                 }
-                Task.WaitAll(tasks.ToArray());
+                await Task.WhenAll(tasks.ToArray());
                 RuntimeContext.logger.Info($"End crawl data novel: {pathNovel}");
             }
         }

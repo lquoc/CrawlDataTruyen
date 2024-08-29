@@ -177,6 +177,10 @@ namespace Common
                 Directory.CreateDirectory(outPath.Replace("\\\\", "\\"));
             }
             var pathCombine = Path.Combine(outPath.Trim(), Path.GetFileName(imgUrl).RemoveInvalidPathChars());
+            if (!pathCombine.Contains(".jpg"))
+            {
+                pathCombine = pathCombine + ".jpg";
+            }
             try
             {
                 WebClient webClient = new WebClient();

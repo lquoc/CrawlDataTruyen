@@ -42,8 +42,6 @@ namespace CrawlDataTruyen
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-
-
             if (string.IsNullOrEmpty(RuntimeContext.PathCrawl) || string.IsNullOrEmpty(RuntimeContext.PathSaveLocal))
             {
                 MessageBox.Show("Please fill all info in Crawl Data.");
@@ -59,17 +57,28 @@ namespace CrawlDataTruyen
             }
 
             RuntimeContext.IsStart = true;
-
-            groupCrawlDataInfo.Enabled = false;
-            groupChangeText.Enabled = false;
-            btn_Start.Enabled = false;
-
+            ChangeEnableGroupBox(false);
             var managerService = RuntimeContext._serviceProvider.GetRequiredService<ManagerService>();
-            Task.Run(() =>
+            Task.Run(async() =>
             {
-                managerService.StartNovelService();
+                await managerService.StartNovelService(ChangeEnableGroupBox);
             });
+        }
 
+        private void ChangeEnableGroupBox(bool enable)
+        {
+            groupCrawlDataInfo.Invoke(new MethodInvoker(delegate
+            {
+                groupCrawlDataInfo.Enabled = enable;
+            }));
+            groupChangeText.Invoke(new MethodInvoker(delegate
+            {
+                groupChangeText.Enabled = enable;
+            }));
+            btn_Start.Invoke(new MethodInvoker(delegate
+            {
+                btn_Start.Enabled = enable;
+            }));
         }
 
         private void txtThreadNumber_TextChanged(object sender, EventArgs e)
