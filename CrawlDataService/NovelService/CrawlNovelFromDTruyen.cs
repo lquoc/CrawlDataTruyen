@@ -32,11 +32,10 @@ namespace CrawlDataService
 
         public override async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
         {
-            if (string.IsNullOrEmpty(pathNovel)) return null;
+            if (string.IsNullOrEmpty(pathNovel) || !RuntimeContext.IsStart) return null;
             try
             {
-                pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
-
+                
                 string html = pathNovel.DownloadStringWebClient();
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
@@ -67,15 +66,11 @@ namespace CrawlDataService
                 //get discription novel
                 var description = novelDetail?.GetHtmlNode("div", "class", "description")?.InnerText;
 
-
-
-                //var allChapter = GetAllLinkChapterInNovel(pathNovel);
-
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
 
                 var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
 
-                var imgPathLocal = imgPath.DownloadImgage(pathFolder);
+                var imgPathLocal = imgPath?.DownloadImgage(pathFolder);
 
                 var novel = new Novel
                 {
@@ -89,14 +84,6 @@ namespace CrawlDataService
                     VoiceOrMP4Path = pathFolderVoice,
                     PathLocal = pathFolder
                 };
-                //if(RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.MultiNovel)
-                //{
-                //    allChapter.SingleForEach(novel, GetContentChapter);
-                //}
-                //else if (RuntimeContext.TypeCrawl == Repository.Enum.ListEnum.TypeCrawl.OneNovel)
-                //{
-                //    allChapter.MultiThreadParralle((allChapter.Count / RuntimeContext.MaxThread) + RuntimeContext.MaxThread, novel, GetContentChapter);
-                //}
                 WriteFile.WriteFileTxt(novel.GetString());
                 logger.Info($"End crawl data novel {nameNovel}");
                 return novel;
@@ -112,7 +99,7 @@ namespace CrawlDataService
         public override List<string> GetAllLinksChapter(string pathNovel)
         {
             var links = new List<string>();
-            if (string.IsNullOrEmpty(pathNovel)) return links;
+            if (string.IsNullOrEmpty(pathNovel) || !RuntimeContext.IsStart) return links;
             logger.Info($"Start crawl path chapter in novel: {pathNovel}");
             int i = 0;
             while (true && RuntimeContext.IsStart)
@@ -122,7 +109,6 @@ namespace CrawlDataService
                 {
                     logger.Info($"Start crawl path chapter in page: {i}");
                     var newPathSearch = pathNovel.Replace("//1", $"") + $"/{i}";
-                    newPathSearch = PropertyExtension.CheckPathWeb(newPathSearch);
                     var html = newPathSearch.DownloadStringWebClient();
                     HtmlDocument htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(html);
@@ -149,7 +135,7 @@ namespace CrawlDataService
         public override List<string>? GetLinksNovel(string pathSearch)
         {
             var links = new List<string>();
-            if (string.IsNullOrEmpty(pathSearch)) return links;
+            if (string.IsNullOrEmpty(pathSearch) || !RuntimeContext.IsStart) return links;
             logger.Info($"Start crawl path novel page: {pathSearch}");
             int i = 0;
             while (true)
@@ -159,7 +145,6 @@ namespace CrawlDataService
                 {
                     logger.Info($"Start crawl novel in page: {i}");
                     var newPathSearch = pathSearch.Replace("//1", $"") + $"/{i}";
-                    newPathSearch = PropertyExtension.CheckPathWeb(newPathSearch);
                     var html = newPathSearch.DownloadStringWebClient();
                     HtmlDocument htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(html);
@@ -187,8 +172,7 @@ namespace CrawlDataService
 
         public override async Task<ChapterInfo?> GetContentChapter(Novel novel, string? pathChapter)
         {
-            if (string.IsNullOrEmpty(pathChapter)) return null;
-            pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
+            if (string.IsNullOrEmpty(pathChapter) || !RuntimeContext.IsStart) return null;
             try
             {
                 logger.Info($"Start crawl novel:{novel.Name}, chapter: {pathChapter}");
@@ -207,7 +191,7 @@ namespace CrawlDataService
 
                 //get content of chapter
                 var tagDivChapterContent = tagDivChapter?.GetHtmlNode("div", "id", "chapter-content");
-                var contentHtml = tagDivChapterContent.InnerText;
+                var contentHtml = tagDivChapterContent?.InnerText;
                 var content = GetContentFromHTML(tagDivChapterContent);
                 return new ChapterInfo
                 {
@@ -218,7 +202,7 @@ namespace CrawlDataService
             catch (Exception ex)
             {
                 logger.Error($"Error while crawl data novel {novel.Name}, chapter: {pathChapter}, msg: {ex}");
-                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, novel.Name, null, pathChapter, novel.PathLocal));
+                chapterLog.Info(PropertyExtension.FormatErrorChapter(false, novel?.Name, null, pathChapter, novel?.PathLocal));
             }
             return null;
         }

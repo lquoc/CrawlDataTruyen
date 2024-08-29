@@ -24,11 +24,10 @@ namespace CrawlDataService.Service
         public override List<string>? GetLinksNovel(string pathSearch)
         {
             var links = new List<string>();
-            if (string.IsNullOrEmpty(pathSearch)) return links;
+            if (string.IsNullOrEmpty(pathSearch) || !RuntimeContext.IsStart) return links;
             logger.Info($"Start crawl link novel at path:{pathSearch}");
             try
             {
-                pathSearch = PropertyExtension.CheckPathWeb(pathSearch);
                 var html = pathSearch.DownloadStringWebClient();
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
@@ -69,40 +68,11 @@ namespace CrawlDataService.Service
             }
         }
 
-        //todo
-        public async Task StartReCrawData(int numberBatch, List<ChapterErrorLog> novelError, List<ChapterErrorLog> chapterError, string pathSave, string pathSaveVoice)
-        {
-            //if (novelError?.Count > 0)
-            //{
-            //    try
-            //    {
-            //        MultiThreadHelper.MultiThread(novelError.Select(x => x.PathNovel).ToList(), numberBatch, pathSave, pathSaveVoice, GetDataNovel);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        logger.Error($"Error while in setup multithread to ReCrawl Novel, msg: {ex}");
-            //    }
-            //}
-            //if (chapterError?.Count > 0)
-            //{
-            //    logger.Info("Start ReCrawl Chapter Error");
-            //    try
-            //    {
-            //        chapterError.MultiThread(numberBatch, RuntimeContext.PathSaveFileMp3, GetContentChapter);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        logger.Error($"Error while in setup multithread to ReCrawl chapter, msg: {ex}");
-
-            //    }
-            //}
-
-        }
+        
 
         public override List<string>? GetAllLinksChapter(string pathNovel)
         {
             #region info to get allchapter link
-            pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
             string html = pathNovel.DownloadStringWebClient();
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
@@ -173,11 +143,10 @@ namespace CrawlDataService.Service
 
         public override async Task<Novel?> StartGetInfoNovel(string pathNovel, string pathSave, string pathSaveVoice)
         {
-            if (string.IsNullOrEmpty(pathNovel)) return null;
+            if (string.IsNullOrEmpty(pathNovel) || !RuntimeContext.IsStart) return null;
             try
             {
                 int chapterNumber = 1;
-                pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
 
                 string html = pathNovel.DownloadStringWebClient();
                 HtmlDocument htmlDoc = new HtmlDocument();
@@ -261,9 +230,7 @@ namespace CrawlDataService.Service
         public override async Task<ChapterInfo?> GetContentChapter(Novel novel, string? pathChapter)
         {
 
-            if (string.IsNullOrEmpty(pathChapter)) return null;
-            pathChapter = PropertyExtension.CheckPathWeb(pathChapter);
-            //if (chaper % 50 == 0) Thread.Sleep(25000);
+            if (string.IsNullOrEmpty(pathChapter) || !RuntimeContext.IsStart) return null;
             string[] titleChapters = new string[10];
             string titleChapter;
             try

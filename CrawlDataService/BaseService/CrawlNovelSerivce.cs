@@ -1,4 +1,5 @@
-﻿using Common.ErrorNovel;
+﻿using Common;
+using Common.ErrorNovel;
 using Microsoft.Extensions.Hosting;
 using Migration.Common;
 using Repository.Model;
