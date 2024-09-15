@@ -15,6 +15,8 @@
                         return "https://dtruyen.com/";
                     case Repository.Enum.ListEnum.NovelWeb.Nettruyen:
                         return "https://nettruyenviet.com/";
+                    case Repository.Enum.ListEnum.NovelWeb.TruyenQQ:
+                        return "https://truyenqqto.com/";
                     default:
                         return "";
                 }

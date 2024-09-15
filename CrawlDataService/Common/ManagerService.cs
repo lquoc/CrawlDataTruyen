@@ -70,6 +70,7 @@ namespace CrawlDataService.Common
                         if (RuntimeContext.IsStart)
                         {
                             var novel = await service.StartGetInfoNovel(novelPath, pathSaveLocel, PathSaveFileMp3OrMp4);
+                            await CreateMp3OrMp4Discription(novel);
                             var listAllChapter = service.GetAllLinksChapter(novelPath);
                             if (novel != null && listAllChapter != null)
                             {
@@ -92,6 +93,7 @@ namespace CrawlDataService.Common
         public async Task StartCrawlSingleNovel(CrawlNovelSerivce service, int numberBatch, string pathSaveLocel, string PathSaveFileMp3OrMp4, string pathNovel)
         {
             var novel = await service.StartGetInfoNovel(pathNovel, pathSaveLocel, PathSaveFileMp3OrMp4);
+            await CreateMp3OrMp4Discription(novel);
             var listAllChapter = service.GetAllLinksChapter(pathNovel);
             if (novel != null && listAllChapter != null)
             {
@@ -101,7 +103,7 @@ namespace CrawlDataService.Common
                 var tasks = new List<Task>();
                 foreach (var batch in listAllChapter.Chunk(batchNumber))
                 {
-                    var task = Task.Factory.StartNew(async () =>
+                    var task = Task.Run(async () =>
                     {
                         foreach (var chapterPath in batch)
                         {
@@ -119,6 +121,20 @@ namespace CrawlDataService.Common
                 }
                 await Task.WhenAll(tasks.ToArray());
                 RuntimeContext.logger.Info($"End crawl data novel: {pathNovel}");
+            }
+        }
+
+        public async Task CreateMp3OrMp4Discription(Novel? novel)
+        {
+            if (novel == null) return;
+            var discription = $"Giới thiệu truyện {novel.Name}. {novel.Description}";
+            if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP3)
+            {
+                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(discription, novel.VoiceOrMP4Path, novel?.Name.RemoveDiacriticsAndSpaces());
+            }
+            else if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP4)
+            {
+                await mp4Service.CreateVideoFromMp3AndImages(discription, novel.ImgPathLocal, novel.VoiceOrMP4Path, novel?.Name.RemoveDiacriticsAndSpaces());
             }
         }
 

@@ -12,7 +12,7 @@ namespace CrawlDataService
         {
             try
             {
-                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars().Trim()).Trim();
+                var pathCombie = Path.Combine(path.Trim(), nameFile.RemoveInvalidPathChars().Trim()).Trim();
                 var client = RuntimeContext._serviceProvider.GetRequiredService<IAmazonPolly>();
                 using (var fileStream = new FileStream($"{pathCombie}.mp3", FileMode.Create, FileAccess.Write))
                 {
@@ -51,6 +51,7 @@ namespace CrawlDataService
         {
             try
             {
+                longText = longText.RemoveCharSpecial();
                 var parts = SplitTextByBytes(longText, 5000);
                 var client = new TextToSpeechClientBuilder
                 {
@@ -70,6 +71,7 @@ namespace CrawlDataService
                     VoiceSelectionParams voice = new VoiceSelectionParams
                     {
                         LanguageCode = "vi-VN",
+                        Name = "vi-VN-Wavenet-C",
                         SsmlGender = SsmlVoiceGender.Female
                     };
 
@@ -94,8 +96,9 @@ namespace CrawlDataService
         {
             try
             {
+                longText = longText.RemoveCharSpecial();
                 RuntimeContext.logger.Info($"Start create file mp3 for chapter {nameFile}");
-                var pathCombie = Path.Combine(path, nameFile.RemoveInvalidPathChars().Trim()).Trim();
+                var pathCombie = Path.Combine(path.Trim(), nameFile.RemoveInvalidPathChars().Trim()).Trim();
                 var parts = SplitTextByBytes(longText, 5000);
                 var client = new TextToSpeechClientBuilder
                 {

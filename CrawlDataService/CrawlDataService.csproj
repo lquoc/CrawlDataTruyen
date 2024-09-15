@@ -14,7 +14,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
-    <PackageReference Include="RestSharp" Version="111.4.0" />
     <PackageReference Include="Selenium.Support" Version="4.0.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.18.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="122.0.6261.3900-beta" />

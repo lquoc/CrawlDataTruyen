@@ -2,6 +2,7 @@
 using HtmlAgilityPack;
 using Jint;
 using SixLabors.ImageSharp.Processing;
+using System;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -143,9 +144,12 @@ namespace Common
             return webClient.CreateWebClient().DownloadString(path);
         }
 
-        public static string DownloadStringWebClient(this string path)
+        public static string DownloadStringWebClient(this string path, bool isCheckPath = true)
         {
-            path = CheckPathWeb(path);
+            if (isCheckPath)
+            {
+                path = CheckPathWeb(path).Replace("://", "@temp@").Replace("//", "/").Replace("@temp@", "://");
+            }
             var html = "";
             int i = 0;
             do
@@ -311,7 +315,11 @@ namespace Common
             return result;
 
         }
-
+        public static string RemoveCharSpecial(this string context)
+        {
+            return context.Replace("~", "")
+                .Replace("*", "");
+        }
 
         public static int GetNumberFuzzy(this HtmlDocument htmlDoc)
         {
@@ -329,5 +337,30 @@ namespace Common
             }
             return 0;
         }
+
+        public static string DownloadImageFakeInfoWeb(this string imagePath, string pathSave, string pathFake)
+        {
+            Uri uri = new Uri(imagePath);
+            string nameImage = Path.GetFileName(uri.LocalPath);
+            var path = Path.Combine(pathSave, nameImage);
+            using (HttpClient client = new HttpClient())
+            {
+                RuntimeContext.logger.Info($"Start crawl image: {imagePath}");
+                client.Timeout = TimeSpan.FromMinutes(3);
+                client.DefaultRequestHeaders.Referrer = new Uri(pathFake);
+                try
+                {
+                    byte[] imageBytes = client.GetByteArrayAsync(imagePath).GetAwaiter().GetResult();
+                    File.WriteAllBytesAsync(path, imageBytes).GetAwaiter().GetResult();
+                    RuntimeContext.logger.Info($"End crawl image: {imagePath}");
+                }
+                catch (Exception ex)
+                {
+                    RuntimeContext.logger.Error("Error while download image: " + ex.Message);
+                }
+            }
+            return path;
+        }
+
     }
 }

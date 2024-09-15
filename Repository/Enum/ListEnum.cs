@@ -7,6 +7,7 @@
             Wikidich = 0,
             DTruyen = 1,
             Nettruyen = 2,
+            TruyenQQ = 3,
         }
 
         public enum TypeFile
