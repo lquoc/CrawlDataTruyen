@@ -2,7 +2,6 @@
 using CrawlDataService.Service;
 using HtmlAgilityPack;
 using Repository.Model;
-using System.Diagnostics.Metrics;
 
 namespace CrawlDataService
 {
@@ -66,7 +65,7 @@ namespace CrawlDataService
                 var pathFolder = WriteFile.CreateFolder(novel.PathLocal.Trim(), titleChapter.RemoveDiacriticsAndSpaces());
                 foreach (var image in listLinkImage)
                 {
-                    await DownloadImageNettruyen(image, pathFolder);
+                    image.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
                 }
                 logger.Info($"End crawl novel:{novel.Name}, chapter: {pathChapter}");
                 return new ChapterInfo
@@ -122,7 +121,7 @@ namespace CrawlDataService
                         var tagDivPagination = tagDivCenter?.GetHtmlNode("div", "id", "ctl00_mainContent_ctl01_divPager");
                         var tagAListPagination = tagDivPagination?.GetListHtmlNode("a");
                         var listInt = tagAListPagination?.Where(e => int.TryParse(e.InnerText, out var number)).Select(e => int.Parse(e.InnerText)).ToList();
-                        if (listInt!= null && listInt.Any())
+                        if (listInt != null && listInt.Any())
                         {
                             endPage = listInt.Max();
                         }
@@ -185,7 +184,7 @@ namespace CrawlDataService
 
                 var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
                 var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
-                var imgPathLocal = await DownloadImageNettruyen(imgPath, pathFolder);
+                var imgPathLocal = imgPath.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
 
                 var novel = new Novel
                 {
@@ -208,29 +207,6 @@ namespace CrawlDataService
                 chapterLog.Info(PropertyExtension.FormatErrorChapter(true, null, pathNovel, null, null));
             }
             return null;
-        }
-
-        public async Task<string> DownloadImageNettruyen(string imagePath, string pathSave)
-        {
-            var nameImage = Path.GetFileName(imagePath);
-            var path = Path.Combine(pathSave, nameImage);
-            using (HttpClient client = new HttpClient())
-            {
-                logger.Info($"Start crawl image: {imagePath}");
-                client.Timeout = TimeSpan.FromMinutes(3);
-                client.DefaultRequestHeaders.Referrer = new Uri("https://nettruyenviet.com");
-                try
-                {
-                    byte[] imageBytes = await client.GetByteArrayAsync(imagePath);
-                    await File.WriteAllBytesAsync(path, imageBytes);
-                    logger.Info($"End crawl image: {imagePath}");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error("Error while download image: " + ex.Message);
-                }
-            }
-            return path;
         }
     }
 }

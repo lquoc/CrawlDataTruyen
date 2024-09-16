@@ -1,6 +1,6 @@
 ﻿namespace CrawlDataTruyen
 {
-    partial class Form1
+    partial class FCrawlTruyen
     {
         /// <summary>
         ///  Required designer variable.
@@ -58,7 +58,7 @@
             // 
             // btn_Start
             // 
-            btn_Start.Location = new Point(472, 381);
+            btn_Start.Location = new Point(479, 395);
             btn_Start.Name = "btn_Start";
             btn_Start.Size = new Size(94, 29);
             btn_Start.TabIndex = 0;
@@ -224,7 +224,7 @@
             groupChangeText.Controls.Add(cbChangeTextIntoVoice);
             groupChangeText.Controls.Add(label5);
             groupChangeText.Controls.Add(txtPathFolderVoice);
-            groupChangeText.Location = new Point(594, 24);
+            groupChangeText.Location = new Point(601, 38);
             groupChangeText.Name = "groupChangeText";
             groupChangeText.Size = new Size(496, 339);
             groupChangeText.TabIndex = 19;
@@ -246,7 +246,7 @@
             groupCrawlDataInfo.Controls.Add(label2);
             groupCrawlDataInfo.Controls.Add(txtThreadNumber);
             groupCrawlDataInfo.Controls.Add(label3);
-            groupCrawlDataInfo.Location = new Point(26, 24);
+            groupCrawlDataInfo.Location = new Point(33, 38);
             groupCrawlDataInfo.Name = "groupCrawlDataInfo";
             groupCrawlDataInfo.Size = new Size(549, 339);
             groupCrawlDataInfo.TabIndex = 20;
@@ -299,7 +299,7 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(580, 381);
+            btnCancel.Location = new Point(587, 395);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(94, 29);
             btnCancel.TabIndex = 21;
@@ -307,17 +307,23 @@
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += btnCancel_Click;
             // 
-            // Form1
+            // FCrawlTruyen
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1113, 427);
+            AutoSize = true;
+            ClientSize = new Size(1111, 426);
             Controls.Add(btnCancel);
             Controls.Add(btn_Start);
             Controls.Add(groupChangeText);
             Controls.Add(groupCrawlDataInfo);
-            Name = "Form1";
-            Text = "Form1";
+            MaximizeBox = false;
+            MdiChildrenMinimizedAnchorBottom = false;
+            MinimizeBox = false;
+            Name = "FCrawlTruyen";
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            Text = "FCrawlTruyen";
             groupChangeText.ResumeLayout(false);
             groupChangeText.PerformLayout();
             groupCrawlDataInfo.ResumeLayout(false);

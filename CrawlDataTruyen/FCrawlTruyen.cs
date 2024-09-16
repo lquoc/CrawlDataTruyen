@@ -6,13 +6,13 @@ using static Repository.Enum.ListEnum;
 
 namespace CrawlDataTruyen
 {
-    public partial class Form1 : Form
+    public partial class FCrawlTruyen : Form
     {
 
-        public Form1()
+        public FCrawlTruyen()
         {
             InitializeComponent();
-            txtLinkCrawl.Text = "https://dtruyen.com/thap-nien-70-tieu-tho-may-xinh-dep/";
+            txtLinkCrawl.Text = "https://truyenqqto.com/truyen-tranh/tinh-yeu-cua-chieri-cao-toi-tan-8-met-13285";
 
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
@@ -59,7 +59,7 @@ namespace CrawlDataTruyen
             RuntimeContext.IsStart = true;
             ChangeEnableGroupBox(false);
             var managerService = RuntimeContext._serviceProvider.GetRequiredService<ManagerService>();
-            Task.Run(async() =>
+            Task.Run(async () =>
             {
                 await managerService.StartNovelService(ChangeEnableGroupBox);
             });
@@ -208,5 +208,6 @@ namespace CrawlDataTruyen
         {
             RuntimeContext.ProxyKey = txtKeyAPIProxy.Text;
         }
+
     }
 }

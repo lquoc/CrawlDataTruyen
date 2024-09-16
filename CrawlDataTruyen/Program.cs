@@ -16,7 +16,7 @@ namespace CrawlDataTruyen
             Console.OutputEncoding = Encoding.UTF8;
             InitService.InitServiceProvider();
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new FCrawlTruyen());
         }
     }
 }

@@ -244,7 +244,7 @@ namespace CrawlDataService
                     _ => match.Value
                 };
             });
-            return output;
+            return output.Replace("(adsbygoogle = window.adsbygoogle || []).push({});", "").Replace("~","");
         }
 
     }
