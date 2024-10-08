@@ -130,24 +130,24 @@ namespace CrawlDataService.Common
             var discription = $"Giới thiệu truyện {novel.Name}. {novel.Description}";
             if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP3)
             {
-                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(discription, novel.VoiceOrMP4Path, novel?.Name.RemoveDiacriticsAndSpaces());
+                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(discription, novel.VoiceOrMP4Path, novel?.Name);
             }
             else if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP4)
             {
-                await mp4Service.CreateVideoFromMp3AndImages(discription, novel.ImgPathLocal, novel.VoiceOrMP4Path, novel?.Name.RemoveDiacriticsAndSpaces());
+                await mp4Service.CreateVideoFromMp3AndImages(discription, novel.ImgPathLocal, novel.VoiceOrMP4Path, novel?.Name);
             }
         }
 
         public async void WriteFileTextAndMp3OrMp4(Novel novel, ChapterInfo? chapterInfo)
         {
-            WriteFile.WriteFileTxt(novel.PathLocal.Trim(), chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces(), chapterInfo?.ContentChapter);
+            WriteFile.WriteFileTxt(novel.PathLocal.Trim(), chapterInfo?.TitleChapter, chapterInfo?.ContentChapter);
             if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP3)
             {
-                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(chapterInfo?.ContentChapter, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces());
+                await changeTextToVoiceService.RequestCreateSpeechGoogleCloudy(chapterInfo?.ContentChapter, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter);
             }
             else if (RuntimeContext.IsChangeTextIntoVoice && RuntimeContext.TypeFile == Repository.Enum.ListEnum.TypeFile.MP4)
             {
-                await mp4Service.CreateVideoFromMp3AndImages(chapterInfo?.ContentChapter, novel.ImgPathLocal, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter.RemoveDiacriticsAndSpaces());
+                await mp4Service.CreateVideoFromMp3AndImages(chapterInfo?.ContentChapter, novel.ImgPathLocal, novel.VoiceOrMP4Path, chapterInfo?.TitleChapter);
             }
         }
     }

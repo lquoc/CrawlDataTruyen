@@ -59,7 +59,7 @@ public class CrawlDataFromTruyenQQ : CrawlNovelSerivce
             var listLinkImage = tagImages?.Select(e => e.Attributes["src"].Value).ToList();
 
             //create folder chapter
-            var pathFolder = WriteFile.CreateFolder(novel?.PathLocal.Trim(), titleChapter.RemoveDiacriticsAndSpaces());
+            var pathFolder = WriteFile.CreateFolder(novel?.PathLocal.Trim(), titleChapter);
             foreach (var image in listLinkImage)
             {
                 image.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
@@ -130,8 +130,8 @@ public class CrawlDataFromTruyenQQ : CrawlNovelSerivce
             var getTagDivDescription = tagDivBookOther?.GetHtmlNode("div", "class", "story-detail-info detail-content");
             var description = getTagDivDescription?.GetHtmlNode("p")?.InnerText;
 
-            var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
-            var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
+            var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel);
+            var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel);
             var imgPathLocal = imgPath.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
 
             var novel = new Novel

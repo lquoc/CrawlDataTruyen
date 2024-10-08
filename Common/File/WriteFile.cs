@@ -70,12 +70,12 @@ namespace Common
             try
             {
                 logger.Info($"Start write file {nameFile}.txt");
-                var newFileName = nameFile.RemoveInvalidPathChars().Trim();
+                var newFileName = nameFile.RemoveInvalidPathChars();
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path.Replace("\\\\", "\\"));
                 }
-                var pathCombine = Path.Combine(path, newFileName.RemoveDiacriticsAndSpaces());
+                var pathCombine = Path.Combine(path, newFileName);
                 using (StreamWriter writer = new StreamWriter($"{pathCombine}.txt"))
                 {
                     writer.WriteLine(content);
