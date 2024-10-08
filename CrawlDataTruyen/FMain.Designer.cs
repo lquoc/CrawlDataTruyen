@@ -56,6 +56,7 @@
             changeTextToMp4ToolStripMenuItem.Name = "changeTextToMp4ToolStripMenuItem";
             changeTextToMp4ToolStripMenuItem.Size = new Size(188, 24);
             changeTextToMp4ToolStripMenuItem.Text = "Chuyển Ảnh Thành Video";
+            changeTextToMp4ToolStripMenuItem.Click += changeTextToMp4ToolStripMenuItem_Click;
             // 
             // FMain
             // 

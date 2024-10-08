@@ -19,7 +19,7 @@ namespace CrawlDataService
             {
                 logger.Info($"Start crawl all links chapter");
 
-                string html = pathNovel.DownloadStringWebClient();
+                string html = pathNovel.DownloadStringWebClient(false);
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
@@ -47,7 +47,7 @@ namespace CrawlDataService
             {
                 logger.Info($"Start crawl novel:{novel.Name}, chapter: {pathChapter}");
                 HtmlDocument htmlDoc = new HtmlDocument();
-                var html = pathChapter.DownloadStringWebClient();
+                var html = pathChapter.DownloadStringWebClient(false);
                 htmlDoc.LoadHtml(html);
 
                 var tagDivCenter = htmlDoc.GetHtmlNode("div", "id", "ctl00_divCenter");
@@ -149,7 +149,7 @@ namespace CrawlDataService
             try
             {
                 //pathNovel = PropertyExtension.CheckPathWeb(pathNovel);
-                string html = pathNovel.DownloadStringWebClient();
+                string html = pathNovel.DownloadStringWebClient(false);
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
