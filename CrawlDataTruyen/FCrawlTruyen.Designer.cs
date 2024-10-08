@@ -311,8 +311,10 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            AutoSize = true;
-            ClientSize = new Size(1111, 426);
+            ClientSize = new Size(1139, 460);
+            this.Location = new Point(0, 0);
+            this.ControlBox = false;
+            this.FormBorderStyle = FormBorderStyle.None;
             Controls.Add(btnCancel);
             Controls.Add(btn_Start);
             Controls.Add(groupChangeText);

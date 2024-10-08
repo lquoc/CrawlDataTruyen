@@ -11,9 +11,9 @@ namespace CrawlDataTruyen
 
         public FCrawlTruyen()
         {
+            
             InitializeComponent();
             txtLinkCrawl.Text = "https://truyenqqto.com/truyen-tranh/tinh-yeu-cua-chieri-cao-toi-tan-8-met-13285";
-
             txtThreadNumber.Text = RuntimeContext.MaxThread.ToString();
             cbChangeTextIntoVoice.Checked = RuntimeContext.IsChangeTextIntoVoice;
             radibtnMp3.Checked = RuntimeContext.TypeFile == TypeFile.MP3;
