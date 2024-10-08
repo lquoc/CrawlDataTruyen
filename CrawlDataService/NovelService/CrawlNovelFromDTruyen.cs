@@ -40,11 +40,12 @@ namespace CrawlDataService
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
-                //get name of novel
-                var nameNovel = htmlDoc.GetHtmlNode("title")?.InnerText.Split("-")[0];
 
                 //get tag novel detail
                 var novelDetail = htmlDoc.GetHtmlNode("div", "id", "story-detail");
+                
+                //get name of novel
+                var nameNovel = novelDetail?.GetHtmlNode("h1", "class", "title")?.InnerText;
 
                 //get author novel
                 var getTagPAuthor = novelDetail?.GetHtmlNode("p", "class", "author");
@@ -66,9 +67,9 @@ namespace CrawlDataService
                 //get discription novel
                 var description = novelDetail?.GetHtmlNode("div", "class", "description")?.InnerText;
 
-                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel);
 
-                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel);
 
                 var imgPathLocal = imgPath?.DownloadImgage(pathFolder);
 

@@ -62,7 +62,7 @@ namespace CrawlDataService
                 var listLinkImage = tagImages.Select(e => e.Attributes["data-src"].Value).ToList();
 
                 //create folder chapter
-                var pathFolder = WriteFile.CreateFolder(novel.PathLocal.Trim(), titleChapter.RemoveDiacriticsAndSpaces());
+                var pathFolder = WriteFile.CreateFolder(novel.PathLocal.Trim(), titleChapter);
                 foreach (var image in listLinkImage)
                 {
                     image.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
@@ -182,8 +182,8 @@ namespace CrawlDataService
                 var getTagDivContent = detailInfo?.GetHtmlNode("div", "class", "detail-content");
                 var description = getTagDivContent?.GetHtmlNode("div", "class", "shortened")?.InnerText;
 
-                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
-                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel);
+                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel);
                 var imgPathLocal = imgPath.DownloadImageFakeInfoWeb(pathFolder, Constant.PathNovelWeb);
 
                 var novel = new Novel

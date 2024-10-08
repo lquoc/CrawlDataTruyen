@@ -77,43 +77,20 @@ namespace Common
             return htmlNote?.SelectMany(e => e.Descendants(tagName)).ToList();
         }
 
-        public static string RemoveDiacriticsAndSpaces(this string? name)
-        {
-            if (string.IsNullOrEmpty(name)) return string.Empty;
-            var normalizedString = name.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder();
-
-            foreach (var c in normalizedString)
-            {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
-                    stringBuilder.Append(c);
-                }
-            }
-
-            string resultWithoutDiacritics = stringBuilder.ToString().Normalize(NormalizationForm.FormC);
-
-            //string resultWithoutSpaces = resultWithoutDiacritics.Replace(" ", "");
-
-            return resultWithoutDiacritics;
-        }
-
         public static string RemoveInvalidPathChars(this string nameFolder)
         {
-            char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
-            foreach (char invalidChar in invalidFileNameChars)
-            {
-                nameFolder = nameFolder.Replace(invalidChar.ToString(), "");
-            }
-            return nameFolder;
+            string pattern = @"[\/:*?""<>|]";
+            return Regex.Replace(nameFolder, pattern, "").Trim();
         }
 
         public static string CheckPathWeb(string path)
         {
-            if (!path.Contains(Constant.PathNovelWeb))
+            if (!path.Contains("https://"))
             {
-                return path = $"{Constant.PathNovelWeb}{path}";
+                if (!path.Contains(Constant.PathNovelWeb))
+                {
+                    return path = $"{Constant.PathNovelWeb}{path}";
+                }
             }
             return path;
         }

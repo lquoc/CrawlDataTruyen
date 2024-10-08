@@ -187,8 +187,8 @@ namespace CrawlDataService.Service
                 var tagA = controlBtnNode?.GetListHtmlNode("a", "class", "btn waves-effect waves-light orange-btn");
                 var hrefValue = tagA?.FirstOrDefault(e => e.InnerText.Equals("Đọc"))?.Attributes["href"].Value;
 
-                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel.RemoveDiacriticsAndSpaces());
-                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel.RemoveDiacriticsAndSpaces());
+                var pathFolder = WriteFile.CreateFolder(pathSave, nameNovel);
+                var pathFolderVoice = WriteFile.CreateFolder(pathSaveVoice, nameNovel);
 
                 var imgPathLocal = (Constant.PathNovelWeb + imgPath).DownloadImgage(pathFolder);
 
